@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Sala FF</title>
+    <style>
+        body { background-color: #111; color: #ffcc00; font-family: "Arial", sans-serif; text-align: center; }
+        h1 { margin-top: 50px; }
+        input { padding: 10px; margin: 10px; border-radius: 5px; border: none; font-size: 1em; }
+        button { padding: 10px 20px; background-color: #ff3300; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Login do Admin</h1>
+    <form method="POST" action="{{ url_for('admin_login') }}">
+        <input type="text" name="usuario" placeholder="Usuário" required>
+        <br>
+        <input type="password" name="senha" placeholder="Senha" required>
+        <br>
+        <button type="submit">Entrar</button>
+    </form>
+</body>
+</html>

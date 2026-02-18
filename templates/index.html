@@ -1,32 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Recarga Sala FF 🔥</title>
-<style>
-body { font-family: Arial; background:#0f0f0f; color:#fff; text-align:center; padding:50px; }
-h1 { color:#ffcc00; }
-input, button { padding:10px; margin:10px; font-size:16px; }
-.erro { color:red; }
-.sala-link { display:block; margin:10px; padding:15px; background:#222; border-radius:10px; text-decoration:none; color:#fff; }
-.sala-link:hover { background:#ffcc00; color:#000; }
-</style>
+    <meta charset="UTF-8">
+    <title>Recarga Sala FF 🔥</title>
 </head>
 <body>
-<h1>Recarga Sala FF 🔥</h1>
-{% if erro %}<p class="erro">{{ erro }}</p>{% endif %}
+    <h1>Escolha sua Sala</h1>
 
-<form method="POST">
-<input type="text" name="nick" placeholder="Digite seu nick do Free Fire">
-<button type="submit">Continuar</button>
-</form>
+    {% if erro %}
+        <p style="color:red;">{{ erro }}</p>
+    {% endif %}
 
-<h2>Salas disponíveis</h2>
-{% for nome, dados in salas.items() %}
-<a class="sala-link" href="{{ url_for('sala', nome_sala=nome, nick=request.args.get('nick','')) }}">
-    {{ nome }}
-</a>
-{% endfor %}
+    <form method="POST">
+        <input type="text" name="nick" placeholder="Seu nick do Free Fire">
+        <button type="submit">Continuar</button>
+    </form>
+
+    <h2>Salas disponíveis:</h2>
+    <ul>
+    {% for nome, dados in salas.items() %}
+        <li>{{ nome }} - ID: {{ dados.id }}, Senha: {{ dados.senha }}</li>
+    {% endfor %}
+    </ul>
 </body>
 </html>

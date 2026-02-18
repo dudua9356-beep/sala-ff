@@ -4,70 +4,46 @@
 <meta charset="UTF-8">
 <title>Recarga Sala FF 🔥</title>
 <style>
-  body {
-    background-image: url('https://share.google/cG3BrTRr9BBOkoS0n'); /* imagem do nome do jogo */
+body {
+    background: url('https://share.google/cG3BrTRr9BBOkoS0n') no-repeat center center fixed;
     background-size: cover;
-    background-position: center;
     font-family: Arial, sans-serif;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  .container {
-    background-color: rgba(0,0,0,0.7);
-    padding: 30px;
-    border-radius: 15px;
     text-align: center;
-  }
-  select, input {
-    padding: 10px;
-    margin: 10px 0;
-    width: 80%;
-    border-radius: 5px;
-    border: none;
-  }
-  button {
-    padding: 10px 20px;
-    background-color: #ffcc00;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  a.admin-link {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    color: #ffcc00;
-    text-decoration: none;
-    font-weight: bold;
-  }
+    color: white;
+}
+.container {
+    margin-top: 50px;
+    padding: 20px;
+    background: rgba(0,0,0,0.6);
+    display: inline-block;
+    border-radius: 10px;
+}
+select, input { padding: 10px; margin: 10px; }
+button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+.adm { position: absolute; top: 10px; right: 10px; }
 </style>
 </head>
 <body>
-<a href="{{ url_for('admin_login') }}" class="admin-link">ADM</a>
+<a class="adm" href="{{ url_for('admin_login') }}">ADM</a>
 <div class="container">
-  <h1>Recarga Sala FF 🔥</h1>
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      {% for msg in messages %}
-        <p style="color:red">{{ msg }}</p>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-  <form method="POST">
+<h1>Recarga Sala FF 🔥</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <p style="color:red">{{ message }}</p>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+<form method="POST">
     <label>Escolha a sala:</label><br>
-    <select name="sala" required>
-      {% for nome, dados in salas.items() %}
-        <option value="{{ nome }}">{{ nome }} ({{ dados.jogadores|length }}/{{ dados.max_vagas }})</option>
-      {% endfor %}
+    <select name="sala">
+        {% for nome, dados in salas.items() %}
+        <option value="{{ nome }}">{{ nome }} ({{ dados.jogadores|length }}/49)</option>
+        {% endfor %}
     </select><br>
-    <label>Digite seu nick do Free Fire:</label><br>
     <input type="text" name="nick" placeholder="Seu nick" required><br>
     <button type="submit">Continuar</button>
-  </form>
+</form>
 </div>
 </body>
-        </html>
+</html>

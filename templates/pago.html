@@ -2,16 +2,22 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Pagamento Sala FF 🔥</title>
+    <title>Pagamento - Recarga Sala FF</title>
+    <style>
+        body { background-color: #000; color: #ffcc00; font-family: "Arial", sans-serif; text-align: center; }
+        h1 { margin-top: 50px; }
+        img { margin-top: 20px; width: 250px; height: 250px; }
+    </style>
 </head>
 <body>
-    <h1>Pagamento para {{ nick }}</h1>
-    <p>Valor: R$6,00 via PIX</p>
-
+    <h1>Olá, {{ nick }}! 🚀</h1>
+    <p>Escaneie o QR Code abaixo para pagar R$6 e liberar a sala:</p>
     {% if qr_code %}
-        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code do pagamento">
+        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code Pix">
     {% else %}
-        <p>Erro ao gerar QR Code. Tente novamente.</p>
+        <p>QR Code não gerado. Tente novamente.</p>
     {% endif %}
+    <br>
+    <a href="{{ url_for('sala', nick=nick) }}"><button>Ver Sala após pagamento</button></a>
 </body>
 </html>

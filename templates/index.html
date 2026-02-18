@@ -1,94 +1,39 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Recarga Sala FF 🔥</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-image: url('https://share.google/cG3BrTRr9BBOkoS0n'); /* imagem do jogo */
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            background-color: rgba(0,0,0,0.7);
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            color: white;
-            width: 300px;
-        }
-        input[type="text"] {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: none;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: orange;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: darkorange;
-        }
-        .adm-link {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 14px;
-            color: white;
-            background-color: rgba(255, 165, 0, 0.8);
-            padding: 5px 10px;
-            border-radius: 5px;
-            text-decoration: none;
-        }
-        .erro { color: red; margin-bottom: 10px; }
-    </style>
+<meta charset="UTF-8">
+<title>Recarga Sala FF 🔥</title>
+<style>
+  body {
+    background-image: url('https://share.google/cG3BrTRr9BBOkoS0n'); 
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    color: #fff;
+  }
+  form { background: rgba(0,0,0,0.7); padding: 20px; border-radius: 10px; text-align: center; }
+  input, select, button { padding: 10px; margin: 10px; width: 200px; }
+</style>
 </head>
 <body>
-    <a href="{{ url_for('adm_login') }}" class="adm-link">ADM</a>
+<form method="POST">
+  <h1>Recarga Sala FF 🔥</h1>
+  {% if erro %}<p style="color:red">{{ erro }}</p>{% endif %}
 
-    <div class="container">
-        <h1>Recarga Sala FF 🔥</h1>
-
-        {% if erro %}
-            <p class="erro">{{ erro }}</p>
-        {% endif %}
-
-        <form method="POST">
-            <label for="nick">Digite seu nick do Free Fire:</label><br>
-            <input type="text" name="nick" id="nick" placeholder="Seu nick" required><br>
-            <button type="submit">Continuar</button>
-        </form>
-
-        {% if qr_code %}
-            <h3>QR Code para pagamento:</h3>
-            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br><br>
-            <input type="text" value="{{ codigo_pix }}" id="pixcode" readonly style="width:80%; padding:5px;">
-            <button onclick="copiarCodigo()">Copiar Código</button>
-        {% endif %}
-    </div>
-
-    <script>
-        function copiarCodigo() {
-            const copyText = document.getElementById("pixcode");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999);
-            document.execCommand("copy");
-            alert("Código copiado!");
-        }
-    </script>
+  <input type="text" name="nick" placeholder="Seu nick" required>
+  <select name="sala" required>
+    {% for nome, dados in salas.items() %}
+      <option value="{{ nome }}">{{ nome }} ({{ dados.ocupados }}/{{ dados.max }})</option>
+    {% endfor %}
+  </select>
+  <br>
+  <button type="submit">Continuar</button>
+  <br><br>
+  <a href="{{ url_for('adm_login') }}" style="color:yellow;">ADM</a>
+</form>
 </body>
 </html>

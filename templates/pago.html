@@ -2,72 +2,46 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Pagamento - {{ sala_nome }}</title>
+<title>Pagamento - {{ sala }}</title>
 <style>
-  body {
-    background-image: url('https://share.google/K03P5KyhpFTigjOaq'); /* imagem da sala */
+body {
+    background: url('https://share.google/K03P5KyhpFTigjOaq') no-repeat center center fixed;
     background-size: cover;
-    background-position: center;
     font-family: Arial, sans-serif;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  .container {
-    background-color: rgba(0,0,0,0.7);
-    padding: 30px;
-    border-radius: 15px;
     text-align: center;
-  }
-  img {
-    width: 200px;
-    height: 200px;
-  }
-  button {
-    padding: 10px 20px;
-    margin-top: 10px;
-    background-color: #ffcc00;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  input {
-    padding: 10px;
-    width: 80%;
-    border-radius: 5px;
-    border: none;
-    margin-top: 10px;
-    text-align: center;
-  }
+    color: white;
+}
+.container {
+    margin-top: 50px;
+    padding: 20px;
+    background: rgba(0,0,0,0.6);
+    display: inline-block;
+    border-radius: 10px;
+}
+button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+input { padding: 10px; width: 250px; }
 </style>
+<script>
+function copiar() {
+    var copyText = document.getElementById("pix_code");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    alert("Código Pix copiado!");
+}
+</script>
 </head>
 <body>
 <div class="container">
-  <h1>Recarga Sala FF 🔥</h1>
-  {% if erro %}
-    <p style="color:red">{{ erro }}</p>
-  {% endif %}
-  <p>Nick: {{ nick }}</p>
-  {% if qr_code %}
-    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br>
-    <input type="text" id="pix_code" value="{{ pix_code }}" readonly>
-    <button onclick="copiar()">Copiar código PIX</button><br>
-    <script>
-      function copiar() {
-        var copyText = document.getElementById("pix_code");
-        copyText.select();
-        copyText.setSelectionRange(0, 99999);
-        document.execCommand("copy");
-        alert("Código PIX copiado!");
-      }
-    </script>
-    <p>Após efetuar o pagamento, a sala será liberada automaticamente.</p>
-  {% else %}
-    <p>QR Code não gerado. Tente novamente.</p>
-  {% endif %}
+<h2>Nick: {{ nick }}</h2>
+<p>Escaneie o QR Code abaixo para pagar R$6 e liberar a sala:</p>
+{% if qr_code %}
+<img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br>
+<input type="text" value="{{ pix_code }}" id="pix_code" readonly>
+<button onclick="copiar()">Copiar</button>
+{% else %}
+<p>QR Code não gerado. Tente novamente.</p>
+{% endif %}
 </div>
 </body>
 </html>

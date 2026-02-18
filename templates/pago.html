@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Pagamento Sala FF</title>
+<style>
+body { font-family: Arial; background:#0b0b0b; color:#fff; text-align:center; }
+button { padding:10px; background:#ff3d00; color:#fff; border:none; cursor:pointer; }
+</style>
+</head>
+<body>
+<h1>✅ Pagamento iniciado para {{ nick }}</h1>
+<p>Pague usando este QR Code PIX:</p>
+<img src="data:image/png;base64,{{ qr }}" alt="QR Code"><br>
+<h2>Sala ID: {{ sala_id }}</h2>
+<h2>Senha: {{ senha }}</h2>
+<p>Após o pagamento confirmado, você poderá entrar!</p>
+</body>
+</html>

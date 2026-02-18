@@ -3,49 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <title>Painel ADM</title>
-<style>
-body { font-family: Arial; text-align: center; background-color: #222; color: white; }
-.container { margin-top: 50px; padding: 20px; display: inline-block; background: rgba(0,0,0,0.7); border-radius: 10px; }
-input, button { padding: 10px; margin: 10px; }
-table { margin: auto; border-collapse: collapse; }
-td, th { border: 1px solid white; padding: 5px 10px; }
-</style>
 </head>
 <body>
-<div class="container">
 <h1>Painel ADM</h1>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <p style="color:green">{{ message }}</p>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+
 <h2>Editar Salas</h2>
-<form method="POST">
-<select name="sala">
-    {% for nome, dados in salas.items() %}
-    <option value="{{ nome }}">{{ nome }}</option>
-    {% endfor %}
-</select><br>
-ID da Sala: <input type="text" name="id_sala" required><br>
-Senha: <input type="text" name="senha_sala" required><br>
-<button type="submit">Atualizar</button>
+{% for nome, dados in salas.items() %}
+<form method="POST" action="{{ url_for('editar_sala') }}">
+    <b>{{ nome }}</b><br>
+    ID da Sala: <input type="text" name="id" value="{{ dados.id }}" required><br>
+    Senha: <input type="text" name="senha" value="{{ dados.senha }}" required><br>
+    <input type="hidden" name="sala" value="{{ nome }}">
+    <button type="submit">Atualizar</button>
 </form>
+<hr>
+{% endfor %}
 
 <h2>Jogadores</h2>
-<table>
-<tr><th>Sala</th><th>Nick</th><th>Pago?</th></tr>
-{% for nome, dados in salas.items() %}
-    {% for jogador in dados.jogadores %}
+<form method="POST" action="{{ url_for('limpar_jogadores') }}">
+    <button type="submit">Limpar Lista de Jogadores</button>
+</form>
+<table border="1" cellpadding="5">
     <tr>
-        <td>{{ nome }}</td>
-        <td>{{ jogador.nick }}</td>
-        <td>{{ "Sim" if jogador.pago else "Não" }}</td>
+        <th>Sala</th>
+        <th>Nick</th>
+        <th>Pago?</th>
+    </tr>
+    {% for j in jogadores %}
+    <tr>
+        <td>{{ j.sala }}</td>
+        <td>{{ j.nick }}</td>
+        <td>{{ 'Sim' if j.pago else 'Não' }}</td>
     </tr>
     {% endfor %}
-{% endfor %}
 </table>
-</div>
 </body>
 </html>

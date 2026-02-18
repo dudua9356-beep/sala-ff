@@ -2,32 +2,72 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Pagamento</title>
+<title>Pagamento - {{ sala_nome }}</title>
 <style>
-body { text-align: center; font-family: sans-serif; background: #111; color: #fff; }
-.qr { margin: 20px; }
-button { padding: 10px 20px; margin: 10px; border:none; background: orange; color: #fff; cursor:pointer; border-radius:5px;}
-input { width: 300px; text-align: center; }
+  body {
+    background-image: url('https://share.google/K03P5KyhpFTigjOaq'); /* imagem da sala */
+    background-size: cover;
+    background-position: center;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .container {
+    background-color: rgba(0,0,0,0.7);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+  }
+  img {
+    width: 200px;
+    height: 200px;
+  }
+  button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    background-color: #ffcc00;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  input {
+    padding: 10px;
+    width: 80%;
+    border-radius: 5px;
+    border: none;
+    margin-top: 10px;
+    text-align: center;
+  }
 </style>
 </head>
 <body>
-<h1>Recarga Sala FF 🔥</h1>
-<p>Nick: {{ nick }}</p>
-<p>Sala: {{ sala }}</p>
-{% if erro %}<p style="color:red">{{ erro }}</p>{% else %}
-<img class="qr" src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br>
-<input type="text" id="codigo_pix" value="{{ codigo_pix }}" readonly>
-<button onclick="copiar()">Copiar Código</button>
-<script>
-function copiar() {
-  var copyText = document.getElementById("codigo_pix");
-  copyText.select();
-  copyText.setSelectionRange(0, 99999);
-  document.execCommand("copy");
-  alert("Código copiado!");
-}
-</script>
-<a href="{{ url_for('sala', nick=nick) }}"><button>Paguei</button></a>
-{% endif %}
+<div class="container">
+  <h1>Recarga Sala FF 🔥</h1>
+  {% if erro %}
+    <p style="color:red">{{ erro }}</p>
+  {% endif %}
+  <p>Nick: {{ nick }}</p>
+  {% if qr_code %}
+    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br>
+    <input type="text" id="pix_code" value="{{ pix_code }}" readonly>
+    <button onclick="copiar()">Copiar código PIX</button><br>
+    <script>
+      function copiar() {
+        var copyText = document.getElementById("pix_code");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        alert("Código PIX copiado!");
+      }
+    </script>
+    <p>Após efetuar o pagamento, a sala será liberada automaticamente.</p>
+  {% else %}
+    <p>QR Code não gerado. Tente novamente.</p>
+  {% endif %}
+</div>
 </body>
 </html>

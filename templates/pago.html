@@ -2,86 +2,32 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Pagamento - Recarga Sala FF 🔥</title>
+<title>Pagamento</title>
 <style>
-body {
-    background-image: url("https://share.google/K03P5KyhpFTigjOaq");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    font-family: Arial, sans-serif;
-    color: white;
-    text-align: center;
-}
-
-.container {
-    background-color: rgba(0,0,0,0.6);
-    padding: 30px;
-    border-radius: 15px;
-    display: inline-block;
-    margin-top: 50px;
-}
-
-button, input {
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
-    border: none;
-    font-size: 16px;
-}
-
-button {
-    background-color: #ffcc00;
-    color: black;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-button:hover {
-    background-color: #ffaa00;
-}
-
-img.logo {
-    width: 300px;
-    margin-bottom: 20px;
-}
-
-input#pixCode {
-    width: 300px;
-    text-align: center;
-    font-size: 18px;
-    margin-bottom: 10px;
-}
+body { text-align: center; font-family: sans-serif; background: #111; color: #fff; }
+.qr { margin: 20px; }
+button { padding: 10px 20px; margin: 10px; border:none; background: orange; color: #fff; cursor:pointer; border-radius:5px;}
+input { width: 300px; text-align: center; }
 </style>
 </head>
 <body>
-<img src="https://share.google/cG3BrTRr9BBOkoS0n" class="logo" alt="Free Fire">
-
-<div class="container">
-    <h1>Recarga Sala FF 🔥</h1>
-    <p>Nick: <strong>{{ nick }}</strong></p>
-
-    <h2>Escaneie o QR Code abaixo para pagar R$6:</h2>
-    {% if qr_code %}
-        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code PIX">
-    {% else %}
-        <p style="color:red;">QR Code não gerado. Tente novamente.</p>
-    {% endif %}
-
-    <p>Código PIX:</p>
-    <input type="text" value="{{ payment_code }}" id="pixCode" readonly>
-    <br>
-    <button onclick="copiarPix()">Copiar código PIX</button>
-</div>
-
+<h1>Recarga Sala FF 🔥</h1>
+<p>Nick: {{ nick }}</p>
+<p>Sala: {{ sala }}</p>
+{% if erro %}<p style="color:red">{{ erro }}</p>{% else %}
+<img class="qr" src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br>
+<input type="text" id="codigo_pix" value="{{ codigo_pix }}" readonly>
+<button onclick="copiar()">Copiar Código</button>
 <script>
-function copiarPix() {
-  var copyText = document.getElementById("pixCode");
+function copiar() {
+  var copyText = document.getElementById("codigo_pix");
   copyText.select();
   copyText.setSelectionRange(0, 99999);
-  navigator.clipboard.writeText(copyText.value);
-  alert("Código PIX copiado!");
+  document.execCommand("copy");
+  alert("Código copiado!");
 }
 </script>
+<a href="{{ url_for('sala', nick=nick) }}"><button>Paguei</button></a>
+{% endif %}
 </body>
-  </html>
+</html>

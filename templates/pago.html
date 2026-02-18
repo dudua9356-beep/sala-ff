@@ -2,72 +2,86 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Pagamento</title>
+<title>Pagamento - Recarga Sala FF 🔥</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background-image: url('/static/bg_freefire.jpg'); /* fundo estilo Free Fire */
+body {
+    background-image: url("https://share.google/K03P5KyhpFTigjOaq");
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
+    font-family: Arial, sans-serif;
     color: white;
     text-align: center;
-    padding-top: 50px;
-  }
-  .container {
-    background: rgba(0,0,0,0.6); /* fundo transparente escuro */
-    padding: 20px;
-    border-radius: 10px;
+}
+
+.container {
+    background-color: rgba(0,0,0,0.6);
+    padding: 30px;
+    border-radius: 15px;
     display: inline-block;
-  }
-  textarea {
-    width: 300px;
-    height: 60px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
+    margin-top: 50px;
+}
+
+button, input {
+    padding: 10px;
+    margin: 10px 0;
     border-radius: 5px;
-    background-color: orange;
+    border: none;
+    font-size: 16px;
+}
+
+button {
+    background-color: #ffcc00;
     color: black;
+    cursor: pointer;
     font-weight: bold;
-  }
-  button:hover {
-    background-color: #ff9900;
-  }
+}
+
+button:hover {
+    background-color: #ffaa00;
+}
+
+img.logo {
+    width: 300px;
+    margin-bottom: 20px;
+}
+
+input#pixCode {
+    width: 300px;
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
 </style>
 </head>
 <body>
+<img src="https://share.google/cG3BrTRr9BBOkoS0n" class="logo" alt="Free Fire">
+
 <div class="container">
-  <h1>Recarga Sala FF 🔥</h1>
-  <p>Nick: {{ nick }}</p>
-  <p>Sala: {{ sala }}</p>
+    <h1>Recarga Sala FF 🔥</h1>
+    <p>Nick: <strong>{{ nick }}</strong></p>
 
-  {% if qr_code %}
-  <h2>Escaneie o QR Code para pagar R$6</h2>
-  <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br><br>
+    <h2>Escaneie o QR Code abaixo para pagar R$6:</h2>
+    {% if qr_code %}
+        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code PIX">
+    {% else %}
+        <p style="color:red;">QR Code não gerado. Tente novamente.</p>
+    {% endif %}
 
-  <p>Código Pix (copia e cola):</p>
-  <textarea id="pixCode" readonly>{{ pix_code }}</textarea><br>
-  <button onclick="copiarPix()">Copiar código Pix</button>
-
-  <script>
-    function copiarPix() {
-      var copyText = document.getElementById("pixCode");
-      copyText.select();
-      copyText.setSelectionRange(0, 99999); /* para mobile */
-      navigator.clipboard.writeText(copyText.value);
-      alert("Código Pix copiado!");
-    }
-  </script>
-  {% else %}
-  <p style="color:red">QR Code não gerado. Tente novamente.</p>
-  {% endif %}
+    <p>Código PIX:</p>
+    <input type="text" value="{{ payment_code }}" id="pixCode" readonly>
+    <br>
+    <button onclick="copiarPix()">Copiar código PIX</button>
 </div>
+
+<script>
+function copiarPix() {
+  var copyText = document.getElementById("pixCode");
+  copyText.select();
+  copyText.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(copyText.value);
+  alert("Código PIX copiado!");
+}
+</script>
 </body>
-    </html>
+  </html>

@@ -5,61 +5,32 @@
 <title>Recarga Sala FF 🔥</title>
 <style>
 body {
-    font-family: Arial, sans-serif;
-    background-image: url('https://lh3.googleusercontent.com/d/1vP4_uS_TqXf_I6Q0Q6F1nE2S8E4B9XyL');
+    background: url('https://lh3.googleusercontent.com/d/1vP4_uS_TqXf_I6Q0Q6F1nE2S8E4B9XyL') no-repeat center center fixed;
     background-size: cover;
-    background-position: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-.container {
-    background: rgba(0,0,0,0.7);
-    padding: 30px;
-    border-radius: 10px;
+    font-family: Arial, sans-serif;
+    color: #fff;
     text-align: center;
-    color: white;
 }
-select, input {
-    padding: 10px;
-    margin: 10px;
-    width: 80%;
-    border-radius: 5px;
-}
-button {
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-a.adm-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    color: white;
-    background: #ff4444;
-    padding: 8px 12px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: bold;
-}
+.container { margin-top: 100px; }
+select, input { padding: 10px; margin: 10px; font-size: 16px; }
+button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
 </style>
 </head>
 <body>
-<a href="{{ url_for('adm_login') }}" class="adm-btn">ADM</a>
 <div class="container">
-    <h1>Recarga Sala FF 🔥</h1>
-    {% if erro %}<p style="color:red">{{ erro }}</p>{% endif %}
-    <form method="POST">
-        <select name="sala" required>
-            <option value="">Escolha a sala</option>
-            {% for nome, dados in salas.items() %}
-                <option value="{{ nome }}">{{ nome }}</option>
-            {% endfor %}
-        </select><br>
-        <input type="text" name="nick" placeholder="Digite seu nick do Free Fire" required><br>
-        <button type="submit">Continuar</button>
-    </form>
+<h1>Recarga Sala FF 🔥</h1>
+{% if erro %}<p style="color:red">{{ erro }}</p>{% endif %}
+<form method="POST">
+<input type="text" name="nick" placeholder="Digite seu nick do Free Fire" required><br>
+<select name="sala" required>
+<option value="">Escolha a sala</option>
+{% for nome, dados in salas.items() %}
+<option value="{{ nome }}">{{ nome }} ({{ dados.jogadores|length }}/{{ dados.max }})</option>
+{% endfor %}
+</select><br>
+<button type="submit">Continuar</button>
+</form>
+<a href="{{ url_for('adm_login') }}" style="position:absolute; top:10px; right:10px; color:#fff;">ADM</a>
 </div>
 </body>
 </html>

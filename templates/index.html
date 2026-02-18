@@ -5,15 +5,22 @@
 <title>Recarga Sala FF 🔥</title>
 <style>
 body {
-    background: url('https://lh3.googleusercontent.com/d/1vP4_uS_TqXf_I6Q0Q6F1nE2S8E4B9XyL') no-repeat center center fixed;
+    background-image: url("https://lh3.googleusercontent.com/d/1vP4_uS_TqXf_I6Q0Q6F1nE2S8E4B9XyL");
     background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     font-family: Arial, sans-serif;
-    color: #fff;
+}
+.container {
+    background-color: rgba(0,0,0,0.6);
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
     text-align: center;
 }
-.container { margin-top: 100px; }
-select, input { padding: 10px; margin: 10px; font-size: 16px; }
-button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+button {padding: 10px 20px; border-radius:5px;}
 </style>
 </head>
 <body>
@@ -21,16 +28,16 @@ button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
 <h1>Recarga Sala FF 🔥</h1>
 {% if erro %}<p style="color:red">{{ erro }}</p>{% endif %}
 <form method="POST">
-<input type="text" name="nick" placeholder="Digite seu nick do Free Fire" required><br>
 <select name="sala" required>
 <option value="">Escolha a sala</option>
 {% for nome, dados in salas.items() %}
-<option value="{{ nome }}">{{ nome }} ({{ dados.jogadores|length }}/{{ dados.max }})</option>
+<option value="{{ nome }}">{{ nome }} ({{ dados.ocupados }}/{{ dados.max }})</option>
 {% endfor %}
-</select><br>
+</select><br><br>
+<input type="text" name="nick" placeholder="Digite seu nick do Free Fire" required><br><br>
 <button type="submit">Continuar</button>
 </form>
-<a href="{{ url_for('adm_login') }}" style="position:absolute; top:10px; right:10px; color:#fff;">ADM</a>
+<a href="{{ url_for('adm_login') }}" style="position:absolute; top:10px; right:10px; color:white;">ADM</a>
 </div>
 </body>
 </html>

@@ -1,93 +1,65 @@
 from flask import Flask, render_template, request, redirect, url_for
 import mercadopago
-import json
 import os
-import uuid
 
 app = Flask(__name__)
 
-# Configurar seu token Mercado Pago aqui
-MP_ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")  # ou coloque sua chave aqui diretamente
-mp = mercadopago.SDK(MP_ACCESS_TOKEN)
+# Mercado Pago
+ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")  # pegue do Render
+sdk = mercadopago.SDK(ACCESS_TOKEN)
 
-# Arquivo simples para armazenar salas e pagamentos
-DATABASE = "data.json"
+# ID e senha da sala (você pode mudar direto aqui ou no HTML)
+SALA_ID = "123456"
+SALA_SENHA = "abcdef"
 
-# Inicializa DB se não existir
-if not os.path.exists(DATABASE):
-    with open(DATABASE, "w") as f:
-        json.dump({"salas": {}, "compradores": {}}, f)
+# Lista de jogadores que já pagaram
+jogadores_pagaram = []
 
-def load_db():
-    with open(DATABASE, "r") as f:
-        return json.load(f)
-
-def save_db(data):
-    with open(DATABASE, "w") as f:
-        json.dump(data, f, indent=4)
-
-# Página inicial / admin
-@app.route("/admin", methods=["GET", "POST"])
-def admin():
-    data = load_db()
+# Rota principal
+@app.route("/", methods=["GET", "POST"])
+def home():
     if request.method == "POST":
-        # Criar nova sala
-        sala_id = request.form["sala_id"]
-        senha = request.form["senha"]
-        link = str(uuid.uuid4())
-        data["salas"][link] = {
-            "sala_id": sala_id,
-            "senha": senha,
-            "jogadores": []
+        nick = request.form.get("nick")
+        if not nick:
+            return render_template("index.html", erro="Digite seu nick do Free Fire.")
+        return redirect(url_for("pago", nick=nick))
+    return render_template("index.html")
+
+# Página de pagamento
+@app.route("/pago")
+def pago():
+    nick = request.args.get("nick")
+    if not nick:
+        return redirect(url_for("home"))
+
+    # Criar pagamento no Mercado Pago
+    payment_data = {
+        "transaction_amount": 6.0,
+        "description": "Recarga Sala FF 🔥",
+        "payment_method_id": "pix",
+        "payer": {
+            "email": f"{nick}@exemplo.com"
         }
-        save_db(data)
-        return render_template("admin.html", salas=data["salas"], message=f"Sala criada! Link: {request.url_root}sala/{link}")
-    return render_template("admin.html", salas=data["salas"])
+    }
 
-# Página de cada sala
-@app.route("/sala/<link>", methods=["GET", "POST"])
-def sala(link):
-    data = load_db()
-    sala = data["salas"].get(link)
-    if not sala:
-        return "Sala inválida ou não existe."
+    payment = sdk.payment().create(payment_data)
+    payment_url = payment["response"].get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64", "")
 
-    if request.method == "POST":
-        nick = request.form["nick"]
-        # Cria pagamento Mercado Pago
-        payment_data = {
-            "transaction_amount": 6,
-            "description": f"Entrada Sala FF - {nick}",
-            "payment_method_id": "pix",
-            "payer": {"email": f"{nick}@example.com"}  # só um dummy
-        }
-        payment = mp.payment().create(payment_data)
-        payment_id = payment["response"]["id"]
+    # Adiciona jogador à lista
+    if nick not in jogadores_pagaram:
+        jogadores_pagaram.append(nick)
 
-        # Salva jogador aguardando pagamento
-        sala["jogadores"].append({"nick": nick, "payment_id": payment_id, "status": "pendente"})
-        data["salas"][link] = sala
-        save_db(data)
+    return render_template("pago.html", nick=nick, qr_code=payment_url)
 
-        # Link de pagamento PIX
-        pix_link = payment["response"]["point_of_interaction"]["transaction_data"]["qr_code_base64"]
-        return render_template("pago.html", qr=pix_link, nick=nick, sala_id=sala["sala_id"], senha=sala["senha"])
+# Página da sala
+@app.route("/sala")
+def sala():
+    nick = request.args.get("nick")
+    if nick not in jogadores_pagaram:
+        return redirect(url_for("home"))
 
-    return render_template("sala.html", link=link)
-
-# Webhook Mercado Pago
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    event = request.json
-    payment_id = event["data"]["id"]
-    data = load_db()
-    for sala in data["salas"].values():
-        for jogador in sala["jogadores"]:
-            if jogador["payment_id"] == payment_id:
-                jogador["status"] = "pago"
-                save_db(data)
-                break
-    return "", 200
+    return render_template("sala.html", id_sala=SALA_ID, senha=SALA_SENHA, nick=nick)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)), debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)

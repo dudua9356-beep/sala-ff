@@ -1,12 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head><meta charset="UTF-8"><title>ADM Login</title></head>
+<head>
+<meta charset="UTF-8">
+<title>Login ADM</title>
+<style>
+  body { background-color: #111; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif; }
+  .container { background-color: rgba(0,0,0,0.8); padding: 30px; border-radius: 15px; text-align: center; }
+  input { padding: 10px; width: 80%; margin: 10px 0; border-radius: 5px; border: none; }
+  button { padding: 10px 20px; background-color: #ffcc00; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+</style>
+</head>
 <body>
+<div class="container">
 <h1>Login ADM</h1>
-{% if erro %}<p style="color:red">{{ erro }}</p>{% endif %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for msg in messages %}
+      <p style="color:red">{{ msg }}</p>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 <form method="POST">
 <input type="password" name="senha" placeholder="Senha" required>
 <button type="submit">Entrar</button>
 </form>
+</div>
 </body>
 </html>

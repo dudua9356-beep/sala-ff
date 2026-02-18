@@ -3,28 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <title>Recarga Sala FF 🔥</title>
+<style>
+body {
+    background-image: url("https://share.google/K03P5KyhpFTigjOaq");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: Arial, sans-serif;
+    color: white;
+    text-align: center;
+}
+
+.container {
+    background-color: rgba(0,0,0,0.6);
+    padding: 30px;
+    border-radius: 15px;
+    display: inline-block;
+    margin-top: 50px;
+}
+
+input, button {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: none;
+    font-size: 16px;
+}
+
+button {
+    background-color: #ffcc00;
+    color: black;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #ffaa00;
+}
+
+img.logo {
+    width: 300px;
+    margin-bottom: 20px;
+}
+</style>
 </head>
 <body>
-<h1>Recarga Sala FF 🔥</h1>
+<img src="https://share.google/cG3BrTRr9BBOkoS0n" class="logo" alt="Free Fire">
 
-{% if erro %}
-<p style="color:red">{{ erro }}</p>
-{% endif %}
-
-<form method="POST">
-<label>Escolha a sala:</label>
-<select name="sala">
-{% for nome, dados in salas.items() %}
-  <option value="{{ nome }}">{{ nome }} ({{ dados.jogadores|length }}/{{ dados.max_vagas }})</option>
-{% endfor %}
-</select><br><br>
-
-<label>Digite seu nick do Free Fire:</label>
-<input type="text" name="nick" placeholder="Seu nick"><br><br>
-<button type="submit">Continuar</button>
-</form>
-
-<a href="{{ url_for('adm_login') }}" style="position:absolute; top:10px; right:10px;">ADM</a>
-
+<div class="container">
+    <h1>Recarga Sala FF 🔥</h1>
+    {% if erro %}<p style="color:red">{{ erro }}</p>{% endif %}
+    <form method="POST">
+        <p>Digite seu nick do Free Fire:</p>
+        <input type="text" name="nick" placeholder="Seu nick" required>
+        <br>
+        <button type="submit">Continuar</button>
+    </form>
+</div>
 </body>
 </html>

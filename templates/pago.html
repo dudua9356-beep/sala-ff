@@ -1,22 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pagamento Sala FF 🔥</title>
-<style>
-body { font-family: Arial; background:#0f0f0f; color:#fff; text-align:center; padding:50px; }
-h1 { color:#ffcc00; }
-img { margin:20px; }
-</style>
+    <meta charset="UTF-8">
+    <title>Pagamento Sala FF 🔥</title>
 </head>
 <body>
-<h1>Olá, {{ nick }}!</h1>
-<p>Escaneie o QR Code abaixo para pagar R$6 e liberar a sala:</p>
-{% if qr_code %}
-<img src="data:image/png;base64,{{ qr_code }}" alt="QR Code Pix">
-{% else %}
-<p>QR Code não gerado. Tente novamente.</p>
-{% endif %}
+    <h1>Pagamento para {{ nick }}</h1>
+    <p>Valor: R$6,00 via PIX</p>
+
+    {% if qr_code %}
+        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code do pagamento">
+    {% else %}
+        <p>Erro ao gerar QR Code. Tente novamente.</p>
+    {% endif %}
 </body>
 </html>

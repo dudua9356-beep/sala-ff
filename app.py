@@ -1,34 +1,36 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 import mercadopago
 import os
 
 app = Flask(__name__)
+app.secret_key = "supersecreto123"
 
 # Mercado Pago
-ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")
+ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")  # coloque no Render
 sdk = mercadopago.SDK(ACCESS_TOKEN)
 
-# Lista de salas (ID, senha e ocupação)
+# Salas
 salas = {
-    "Sala 1": {"id": "123456", "senha": "abcdef", "ocupadas": 0, "max": 49},
-    "Sala 2": {"id": "654321", "senha": "ghijkl", "ocupadas": 0, "max": 49},
+    "Sala 1": {"id": "123456", "senha": "abcdef", "max_vagas": 49, "jogadores": []},
+    "Sala 2": {"id": "654321", "senha": "fedcba", "max_vagas": 49, "jogadores": []},
 }
 
 # Lista de jogadores que já pagaram
-jogadores_pagaram = {}
+pagamentos_confirmados = {}
 
-# Senha do painel ADM
-SENHA_ADM = "Duduzin321@"
+# ADM
+ADM_SENHA = "Duduzin321@"
 
 
-# Página inicial
+# Rota principal
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
         nick = request.form.get("nick")
         sala_escolhida = request.form.get("sala")
         if not nick or not sala_escolhida:
-            return render_template("index.html", erro="Preencha todos os campos.", salas=salas)
+            flash("Preencha nick e escolha uma sala")
+            return redirect(url_for("home"))
         return redirect(url_for("pago", nick=nick, sala=sala_escolhida))
     return render_template("index.html", salas=salas)
 
@@ -37,50 +39,69 @@ def home():
 @app.route("/pago")
 def pago():
     nick = request.args.get("nick")
-    sala_escolhida = request.args.get("sala")
-    if not nick or not sala_escolhida:
+    sala_nome = request.args.get("sala")
+    if not nick or not sala_nome:
         return redirect(url_for("home"))
 
-    # Checar se sala está cheia
-    if salas[sala_escolhida]["ocupadas"] >= salas[sala_escolhida]["max"]:
-        return render_template("pago.html", erro="Sala lotada.", nick=nick, sala=sala_escolhida)
+    sala = salas.get(sala_nome)
+    if not sala:
+        flash("Sala inválida")
+        return redirect(url_for("home"))
 
-    # Criar pagamento no Mercado Pago
+    # Checa se sala lotada
+    if len(sala["jogadores"]) >= sala["max_vagas"]:
+        return render_template("pago.html", erro="Sala lotada", nick=nick, sala_nome=sala_nome)
+
+    # Cria pagamento Mercado Pago
     payment_data = {
         "transaction_amount": 6.0,
-        "description": f"Recarga {sala_escolhida} Free Fire 🔥",
+        "description": f"Recarga {sala_nome} 🔥",
         "payment_method_id": "pix",
-        "payer": {"email": f"{nick}@exemplo.com"}
+        "payer": {"email": f"{nick}@exemplo.com"},
     }
 
     payment = sdk.payment().create(payment_data)
     qr_code = payment["response"].get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64", "")
-    codigo_pix = payment["response"].get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code", "")
+    pix_code = payment["response"].get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code", "")
 
-    return render_template("pago.html", nick=nick, sala=sala_escolhida, qr_code=qr_code, codigo_pix=codigo_pix)
+    # Guarda o pagamento pendente
+    pagamentos_confirmados[nick] = {"sala": sala_nome, "qr_code": qr_code, "pix_code": pix_code, "pago": False}
+
+    return render_template("pago.html", nick=nick, sala_nome=sala_nome, qr_code=qr_code, pix_code=pix_code)
 
 
-# Página da sala após pagamento
+# Verifica pagamento e libera sala
 @app.route("/sala")
 def sala():
     nick = request.args.get("nick")
-    sala_escolhida = request.args.get("sala")
-    if not nick or sala_escolhida not in jogadores_pagaram or nick not in jogadores_pagaram[sala_escolhida]:
+    if not nick or nick not in pagamentos_confirmados:
         return redirect(url_for("home"))
 
-    return render_template("sala.html", id_sala=salas[sala_escolhida]["id"],
-                           senha=salas[sala_escolhida]["senha"], nick=nick)
+    pagamento = pagamentos_confirmados[nick]
+
+    # Atualiza status do pagamento (simulação para testes)
+    # No ambiente real, precisa de webhook do Mercado Pago para atualizar
+    pagamento["pago"] = True
+    sala_nome = pagamento["sala"]
+    sala = salas[sala_nome]
+
+    # Adiciona jogador na sala
+    if nick not in sala["jogadores"]:
+        sala["jogadores"].append(nick)
+
+    return render_template("sala.html", id_sala=sala["id"], senha=sala["senha"], nick=nick, sala_nome=sala_nome)
 
 
-# Login do ADM
+# Login ADM
 @app.route("/admin_login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
         senha = request.form.get("senha")
-        if senha == SENHA_ADM:
+        if senha == ADM_SENHA:
             return redirect(url_for("admin"))
         else:
-            return render_template("admin_login.html", erro="Senha incorreta.")
+            flash("Senha incorreta")
+            return redirect(url_for("admin_login"))
     return render_template("admin_login.html")
 
 
@@ -88,11 +109,14 @@ def admin_login():
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
     if request.method == "POST":
-        # Atualizar salas
-        for nome, dados in salas.items():
-            salas[nome]["id"] = request.form.get(f"id_{nome}")
-            salas[nome]["senha"] = request.form.get(f"senha_{nome}")
-        return render_template("admin.html", salas=salas, sucesso="Salas atualizadas com sucesso!")
+        sala_nome = request.form.get("sala")
+        nova_id = request.form.get("id_sala")
+        nova_senha = request.form.get("senha_sala")
+        if sala_nome in salas:
+            salas[sala_nome]["id"] = nova_id
+            salas[sala_nome]["senha"] = nova_senha
+            flash(f"{sala_nome} atualizado!")
+        return redirect(url_for("admin"))
     return render_template("admin.html", salas=salas)
 
 

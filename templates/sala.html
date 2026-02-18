@@ -2,31 +2,30 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Sala {{ sala_nome }}</title>
+<title>Sala {{ sala }}</title>
 <style>
-  body {
-    background-color: #000;
-    color: #fff;
+body {
+    background: url('https://share.google/K03P5KyhpFTigjOaq') no-repeat center center fixed;
+    background-size: cover;
     font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  .container {
     text-align: center;
-    background-color: rgba(0,0,0,0.8);
-    padding: 30px;
-    border-radius: 15px;
-  }
+    color: white;
+}
+.container {
+    margin-top: 50px;
+    padding: 20px;
+    background: rgba(0,0,0,0.6);
+    display: inline-block;
+    border-radius: 10px;
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Sala: {{ sala_nome }}</h1>
-  <p>Nick: {{ nick }}</p>
-  <p>ID: {{ id_sala }}</p>
-  <p>Senha: {{ senha }}</p>
+<h1>Sala {{ sala }}</h1>
+<p>Nick: {{ nick }}</p>
+<p>ID da sala: {{ id_sala }}</p>
+<p>Senha: {{ senha }}</p>
 </div>
 </body>
 </html>

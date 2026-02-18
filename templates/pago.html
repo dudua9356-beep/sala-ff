@@ -1,85 +1,53 @@
-<!-- templates/pago.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Recarga Sala FF 🔥</title>
+<title>Pagamento Sala FF</title>
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background-image: url("COLE_AQUI_O_LINK_DA_IMAGEM_DE_FUNDO");
-        background-size: cover;
-        background-position: center;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .container {
-        background-color: rgba(0, 0, 0, 0.7);
-        padding: 30px;
-        border-radius: 15px;
-        text-align: center;
-        color: #fff;
-        width: 90%;
-        max-width: 450px;
-    }
-    h1 {
-        margin-bottom: 20px;
-    }
-    .qr-code {
-        margin: 20px 0;
-    }
-    .pix-code {
-        background-color: #fff;
-        color: #000;
-        padding: 10px;
-        border-radius: 8px;
-        word-break: break-all;
-        margin-bottom: 10px;
-    }
-    button {
-        padding: 10px 20px;
-        background-color: #ffcc00;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-    }
-    button:hover {
-        background-color: #ffaa00;
-    }
+body {
+    background: url('https://lh3.googleusercontent.com/d/1vP4_uS_TqXf_I6Q0Q6F1nE2S8E4B9XyL') no-repeat center center fixed;
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    text-align: center;
+}
+.container { margin-top: 100px; }
+button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+input { padding: 10px; font-size: 16px; width: 300px; }
 </style>
 </head>
 <body>
 <div class="container">
-    <h1>Recarga Sala FF 🔥</h1>
-    <p>Nick: {{ nick }}</p>
+<h2>Nick: {{ nick }}</h2>
+<h3>Sala: {{ sala_nome }}</h3>
 
-    {% if qr_code %}
-    <div class="qr-code">
-        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
-    </div>
-    {% else %}
-    <p>QR Code não gerado. Tente novamente.</p>
-    {% endif %}
-
-    {% if pix_code %}
-    <div class="pix-code" id="pixCode">{{ pix_code }}</div>
-    <button onclick="copiarPix()">Copiar código Pix</button>
-    {% endif %}
-</div>
-
+{% if qr_code_base64 %}
+<img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code"><br>
+<input type="text" value="{{ qr_code_text }}" id="pixCode" readonly>
+<button onclick="copyCode()">Copiar Código</button>
 <script>
-function copiarPix() {
-    const pix = document.getElementById("pixCode").innerText;
-    navigator.clipboard.writeText(pix).then(() => {
-        alert("Código Pix copiado!");
-    }).catch(() => {
-        alert("Não foi possível copiar o código.");
-    });
+function copyCode() {
+    var copyText = document.getElementById("pixCode");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    alert("Código PIX copiado!");
 }
+
+// Checagem de pagamento automática a cada 5s
+setInterval(function() {
+    fetch(`/check_payment?nick={{ nick }}&sala={{ sala_nome }}`)
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === "pago") {
+            window.location.href = `/sala?nick={{ nick }}&sala={{ sala_nome }}`;
+        }
+    });
+}, 5000);
 </script>
+{% else %}
+<p>QR Code não gerado. Tente novamente.</p>
+{% endif %}
+</div>
 </body>
 </html>

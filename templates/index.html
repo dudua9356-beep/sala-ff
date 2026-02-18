@@ -1,20 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Sala FF</title>
+<meta charset="UTF-8">
+<title>Admin Sala FF</title>
+<style>
+body { font-family: Arial; background:#1a1a1a; color:#fff; }
+input, button { padding:10px; margin:5px; }
+button { background: #ff3d00; border:none; color:#fff; cursor:pointer; }
+</style>
 </head>
 <body>
-    <h1>Recarga Sala FF 🔥</h1>
-    <button onclick="pagar()">Pagar R$6</button>
+<h1>🎮 Painel Admin Sala FF</h1>
 
-    <script>
-        function pagar() {
-            fetch("/criar-pagamento")
-                .then(res => res.json())
-                .then(data => {
-                    window.location.href = data.link_pagamento;
-                });
-        }
-    </script>
+{% if message %}
+<p style="color:#0f0">{{ message }}</p>
+{% endif %}
+
+<form method="POST">
+    ID da Sala: <input type="text" name="sala_id" required><br>
+    Senha: <input type="text" name="senha" required><br>
+    <button type="submit">Criar Sala</button>
+</form>
+
+<h2>Salas Ativas</h2>
+<ul>
+{% for link, sala in salas.items() %}
+<li>Link: <a href="{{ url_for('sala', link=link) }}">{{ url_for('sala', link=link, _external=True) }}</a> | ID: {{ sala.sala_id }} | Senha: {{ sala.senha }}</li>
+{% endfor %}
+</ul>
 </body>
 </html>

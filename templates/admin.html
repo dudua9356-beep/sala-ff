@@ -4,33 +4,48 @@
 <meta charset="UTF-8">
 <title>Painel ADM</title>
 <style>
-  body { background-color: #222; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
-  .sala { background-color: rgba(0,0,0,0.7); padding: 20px; margin-bottom: 15px; border-radius: 10px; }
-  input { padding: 10px; margin: 5px 0; width: 100%; border-radius: 5px; border: none; }
-  button { padding: 10px 20px; margin-top: 5px; background-color: #ffcc00; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+body { font-family: Arial; text-align: center; background-color: #222; color: white; }
+.container { margin-top: 50px; padding: 20px; display: inline-block; background: rgba(0,0,0,0.7); border-radius: 10px; }
+input, button { padding: 10px; margin: 10px; }
+table { margin: auto; border-collapse: collapse; }
+td, th { border: 1px solid white; padding: 5px 10px; }
 </style>
 </head>
 <body>
+<div class="container">
 <h1>Painel ADM</h1>
-{% with messages = get_flashed_messages() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    {% for msg in messages %}
-      <p style="color:lime">{{ msg }}</p>
+    {% for category, message in messages %}
+      <p style="color:green">{{ message }}</p>
     {% endfor %}
   {% endif %}
 {% endwith %}
+<h2>Editar Salas</h2>
+<form method="POST">
+<select name="sala">
+    {% for nome, dados in salas.items() %}
+    <option value="{{ nome }}">{{ nome }}</option>
+    {% endfor %}
+</select><br>
+ID da Sala: <input type="text" name="id_sala" required><br>
+Senha: <input type="text" name="senha_sala" required><br>
+<button type="submit">Atualizar</button>
+</form>
+
+<h2>Jogadores</h2>
+<table>
+<tr><th>Sala</th><th>Nick</th><th>Pago?</th></tr>
 {% for nome, dados in salas.items() %}
-<div class="sala">
-  <h2>{{ nome }}</h2>
-  <form method="POST">
-    <input type="hidden" name="sala" value="{{ nome }}">
-    <label>ID da sala:</label>
-    <input type="text" name="id_sala" value="{{ dados.id }}"><br>
-    <label>Senha da sala:</label>
-    <input type="text" name="senha_sala" value="{{ dados.senha }}"><br>
-    <button type="submit">Atualizar</button>
-  </form>
-</div>
+    {% for jogador in dados.jogadores %}
+    <tr>
+        <td>{{ nome }}</td>
+        <td>{{ jogador.nick }}</td>
+        <td>{{ "Sim" if jogador.pago else "Não" }}</td>
+    </tr>
+    {% endfor %}
 {% endfor %}
+</table>
+</div>
 </body>
 </html>

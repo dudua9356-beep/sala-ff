@@ -1,49 +1,94 @@
+<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Recarga Sala FF 🔥</title>
-<style>
-body {
-    background: url('https://share.google/cG3BrTRr9BBOkoS0n') no-repeat center center fixed;
-    background-size: cover;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    color: white;
-}
-.container {
-    margin-top: 50px;
-    padding: 20px;
-    background: rgba(0,0,0,0.6);
-    display: inline-block;
-    border-radius: 10px;
-}
-select, input { padding: 10px; margin: 10px; }
-button { padding: 10px 20px; margin: 10px; cursor: pointer; }
-.adm { position: absolute; top: 10px; right: 10px; }
-</style>
+    <meta charset="UTF-8">
+    <title>Recarga Sala FF 🔥</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('https://share.google/cG3BrTRr9BBOkoS0n'); /* imagem do jogo */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: rgba(0,0,0,0.7);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            width: 300px;
+        }
+        input[type="text"] {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: orange;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: darkorange;
+        }
+        .adm-link {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 14px;
+            color: white;
+            background-color: rgba(255, 165, 0, 0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .erro { color: red; margin-bottom: 10px; }
+    </style>
 </head>
 <body>
-<a class="adm" href="{{ url_for('admin_login') }}">ADM</a>
-<div class="container">
-<h1>Recarga Sala FF 🔥</h1>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <p style="color:red">{{ message }}</p>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-<form method="POST">
-    <label>Escolha a sala:</label><br>
-    <select name="sala">
-        {% for nome, dados in salas.items() %}
-        <option value="{{ nome }}">{{ nome }} ({{ dados.jogadores|length }}/49)</option>
-        {% endfor %}
-    </select><br>
-    <input type="text" name="nick" placeholder="Seu nick" required><br>
-    <button type="submit">Continuar</button>
-</form>
-</div>
+    <a href="{{ url_for('adm_login') }}" class="adm-link">ADM</a>
+
+    <div class="container">
+        <h1>Recarga Sala FF 🔥</h1>
+
+        {% if erro %}
+            <p class="erro">{{ erro }}</p>
+        {% endif %}
+
+        <form method="POST">
+            <label for="nick">Digite seu nick do Free Fire:</label><br>
+            <input type="text" name="nick" id="nick" placeholder="Seu nick" required><br>
+            <button type="submit">Continuar</button>
+        </form>
+
+        {% if qr_code %}
+            <h3>QR Code para pagamento:</h3>
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br><br>
+            <input type="text" value="{{ codigo_pix }}" id="pixcode" readonly style="width:80%; padding:5px;">
+            <button onclick="copiarCodigo()">Copiar Código</button>
+        {% endif %}
+    </div>
+
+    <script>
+        function copiarCodigo() {
+            const copyText = document.getElementById("pixcode");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            alert("Código copiado!");
+        }
+    </script>
 </body>
 </html>

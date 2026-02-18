@@ -5,35 +5,44 @@
 <title>Recarga Sala FF 🔥</title>
 <style>
   body {
-    background-image: url('https://share.google/cG3BrTRr9BBOkoS0n'); 
+    margin: 0;
+    padding: 0;
+    background-image: url('https://lh3.googleusercontent.com/d/1vP4_uS_TqXf_I6Q0Q6F1nE2S8E4B9XyL');
     background-size: cover;
     background-position: center;
+    font-family: Arial, sans-serif;
+    color: white;
+  }
+  .container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    font-family: Arial, sans-serif;
-    color: #fff;
+    background-color: rgba(0,0,0,0.4);
   }
-  form { background: rgba(0,0,0,0.7); padding: 20px; border-radius: 10px; text-align: center; }
-  input, select, button { padding: 10px; margin: 10px; width: 200px; }
+  input, select, button {
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 16px;
+  }
+  button { cursor: pointer; }
 </style>
 </head>
 <body>
-<form method="POST">
-  <h1>Recarga Sala FF 🔥</h1>
-  {% if erro %}<p style="color:red">{{ erro }}</p>{% endif %}
-
-  <input type="text" name="nick" placeholder="Seu nick" required>
-  <select name="sala" required>
-    {% for nome, dados in salas.items() %}
-      <option value="{{ nome }}">{{ nome }} ({{ dados.ocupados }}/{{ dados.max }})</option>
-    {% endfor %}
-  </select>
-  <br>
-  <button type="submit">Continuar</button>
-  <br><br>
-  <a href="{{ url_for('adm_login') }}" style="color:yellow;">ADM</a>
-</form>
+  <div class="container">
+    <h1>Recarga Sala FF 🔥</h1>
+    {% if erro %}<p style="color:red">{{ erro }}</p>{% endif %}
+    <form method="POST">
+      <input type="text" name="nick" placeholder="Seu nick do Free Fire" required>
+      <select name="sala" required>
+        <option value="">Escolha a sala</option>
+        {% for nome, dados in salas.items() %}
+        <option value="{{ nome }}">{{ nome }} ({{ dados.jogadores|length }}/49)</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Continuar</button>
+    </form>
+  </div>
 </body>
 </html>

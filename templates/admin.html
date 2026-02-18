@@ -3,19 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <title>Painel ADM</title>
+<style>
+body { font-family: sans-serif; padding:20px; }
+input { margin:5px; padding:5px; }
+button { padding:5px 10px; background:orange; color:white; border:none; cursor:pointer; border-radius:5px;}
+</style>
 </head>
 <body>
 <h1>Painel ADM</h1>
-<a href="{{ url_for('logout') }}">Sair</a>
+{% if sucesso %}<p style="color:green">{{ sucesso }}</p>{% endif %}
+<form method="POST">
 {% for nome, dados in salas.items() %}
 <h2>{{ nome }}</h2>
-<p>Vagas: {{ dados.jogadores|length }}/{{ dados.max_vagas }}</p>
-<p>Jogadores:</p>
-<ul>
-{% for j in dados.jogadores %}
-  <li>{{ j }}</li>
+ID: <input type="text" name="id_{{ nome }}" value="{{ dados.id }}"><br>
+Senha: <input type="text" name="senha_{{ nome }}" value="{{ dados.senha }}"><br>
 {% endfor %}
-</ul>
-{% endfor %}
+<button type="submit">Salvar</button>
+</form>
 </body>
 </html>

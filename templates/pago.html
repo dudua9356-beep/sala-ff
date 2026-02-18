@@ -1,23 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Pagamento - Recarga Sala FF</title>
-    <style>
-        body { background-color: #000; color: #ffcc00; font-family: "Arial", sans-serif; text-align: center; }
-        h1 { margin-top: 50px; }
-        img { margin-top: 20px; width: 250px; height: 250px; }
-    </style>
+<meta charset="UTF-8">
+<title>Pagamento</title>
 </head>
 <body>
-    <h1>Olá, {{ nick }}! 🚀</h1>
-    <p>Escaneie o QR Code abaixo para pagar R$6 e liberar a sala:</p>
-    {% if qr_code %}
-        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code Pix">
-    {% else %}
-        <p>QR Code não gerado. Tente novamente.</p>
-    {% endif %}
-    <br>
-    <a href="{{ url_for('sala', nick=nick) }}"><button>Ver Sala após pagamento</button></a>
+<h1>Recarga Sala FF 🔥</h1>
+<p>Nick: {{ nick }}</p>
+<p>Sala: {{ sala }}</p>
+
+{% if qr_code %}
+<h2>Escaneie o QR Code para pagar R$6</h2>
+<img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br>
+<p>Código Pix (copia e cola):</p>
+<textarea readonly style="width:300px; height:60px;">{{ pix_code }}</textarea>
+{% else %}
+<p style="color:red">QR Code não gerado. Tente novamente.</p>
+{% endif %}
+
 </body>
 </html>

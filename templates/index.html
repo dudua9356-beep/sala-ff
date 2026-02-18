@@ -1,25 +1,55 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recarga Sala FF 🔥</title>
     <style>
-        body { background-color: #1a1a1a; color: #ffcc00; font-family: "Arial", sans-serif; text-align: center; }
-        h1 { margin-top: 50px; font-size: 2.5em; }
-        input { padding: 10px; font-size: 1em; margin: 10px; border-radius: 5px; border: none; }
-        button { padding: 10px 20px; font-size: 1em; background-color: #ff3300; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
-        .erro { color: #ff0000; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e1e;
+            color: #fff;
+            text-align: center;
+            padding: 50px;
+        }
+        input, select, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #ff6600;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff3300;
+        }
+        .erro { color: #ff3333; margin-bottom: 15px; }
     </style>
 </head>
 <body>
     <h1>Recarga Sala FF 🔥</h1>
+
     {% if erro %}
-        <p class="erro">{{ erro }}</p>
+        <div class="erro">{{ erro }}</div>
     {% endif %}
+
     <form method="POST">
-        <input type="text" name="nick" placeholder="Digite seu nick do Free Fire" required>
+        <label for="sala">Escolha a sala:</label>
+        <select name="sala" id="sala" required>
+            {% for nome, dados in salas.items() %}
+                <option value="{{ nome }}">{{ nome }} ({{ dados.ocupados }}/{{ dados.max }})</option>
+            {% endfor %}
+        </select>
         <br>
+
+        <label for="nick">Digite seu nick do Free Fire:</label>
+        <input type="text" name="nick" id="nick" placeholder="Seu nick" required>
+        <br>
+
         <button type="submit">Continuar</button>
     </form>
 </body>
-</html>
+            </html>

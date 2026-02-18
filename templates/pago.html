@@ -3,20 +3,71 @@
 <head>
 <meta charset="UTF-8">
 <title>Pagamento</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-image: url('/static/bg_freefire.jpg'); /* fundo estilo Free Fire */
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    padding-top: 50px;
+  }
+  .container {
+    background: rgba(0,0,0,0.6); /* fundo transparente escuro */
+    padding: 20px;
+    border-radius: 10px;
+    display: inline-block;
+  }
+  textarea {
+    width: 300px;
+    height: 60px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: orange;
+    color: black;
+    font-weight: bold;
+  }
+  button:hover {
+    background-color: #ff9900;
+  }
+</style>
 </head>
 <body>
-<h1>Recarga Sala FF 🔥</h1>
-<p>Nick: {{ nick }}</p>
-<p>Sala: {{ sala }}</p>
+<div class="container">
+  <h1>Recarga Sala FF 🔥</h1>
+  <p>Nick: {{ nick }}</p>
+  <p>Sala: {{ sala }}</p>
 
-{% if qr_code %}
-<h2>Escaneie o QR Code para pagar R$6</h2>
-<img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br>
-<p>Código Pix (copia e cola):</p>
-<textarea readonly style="width:300px; height:60px;">{{ pix_code }}</textarea>
-{% else %}
-<p style="color:red">QR Code não gerado. Tente novamente.</p>
-{% endif %}
+  {% if qr_code %}
+  <h2>Escaneie o QR Code para pagar R$6</h2>
+  <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br><br>
 
+  <p>Código Pix (copia e cola):</p>
+  <textarea id="pixCode" readonly>{{ pix_code }}</textarea><br>
+  <button onclick="copiarPix()">Copiar código Pix</button>
+
+  <script>
+    function copiarPix() {
+      var copyText = document.getElementById("pixCode");
+      copyText.select();
+      copyText.setSelectionRange(0, 99999); /* para mobile */
+      navigator.clipboard.writeText(copyText.value);
+      alert("Código Pix copiado!");
+    }
+  </script>
+  {% else %}
+  <p style="color:red">QR Code não gerado. Tente novamente.</p>
+  {% endif %}
+</div>
 </body>
-</html>
+    </html>

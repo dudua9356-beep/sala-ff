@@ -5,19 +5,22 @@ import os
 app = Flask(__name__)
 
 # Mercado Pago
-ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")
+ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")  # pegar do Render
 sdk = mercadopago.SDK(ACCESS_TOKEN)
 
-# Salas disponíveis
-salas = {
-    "Sala 1": {"id": "123456", "senha": "abcdef"},
-    "Sala 2": {"id": "654321", "senha": "ghijkl"}
-}
+# ID e senha da sala
+SALA_ID = "123456"
+SALA_SENHA = "abcdef"
 
 # Lista de jogadores que já pagaram
 jogadores_pagaram = []
 
-# Página inicial
+# Exemplo de salas disponíveis
+salas = {
+    "Sala 1": {"id": SALA_ID, "senha": SALA_SENHA}
+}
+
+# Rota principal
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
@@ -34,7 +37,7 @@ def pago():
     if not nick:
         return redirect(url_for("home"))
 
-    # Criar pagamento PIX no Mercado Pago
+    # Criar pagamento no Mercado Pago
     payment_data = {
         "transaction_amount": 6.0,
         "description": "Recarga Sala FF 🔥",
@@ -45,23 +48,22 @@ def pago():
     }
 
     payment = sdk.payment().create(payment_data)
-    qr_code_base64 = payment["response"].get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64", "")
+    payment_url = payment["response"].get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64", "")
 
     # Adiciona jogador à lista
     if nick not in jogadores_pagaram:
         jogadores_pagaram.append(nick)
 
-    return render_template("pago.html", nick=nick, qr_code=qr_code_base64)
+    return render_template("pago.html", nick=nick, qr_code=payment_url)
 
-# Página da sala (mostra ID e senha)
-@app.route("/sala/<nome_sala>")
-def sala(nome_sala):
+# Página da sala
+@app.route("/sala")
+def sala():
     nick = request.args.get("nick")
-    if nick not in jogadores_pagaram or nome_sala not in salas:
+    if nick not in jogadores_pagaram:
         return redirect(url_for("home"))
 
-    sala_info = salas[nome_sala]
-    return render_template("sala.html", nick=nick, id_sala=sala_info["id"], senha=sala_info["senha"])
+    return render_template("sala.html", id_sala=SALA_ID, senha=SALA_SENHA, nick=nick)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))

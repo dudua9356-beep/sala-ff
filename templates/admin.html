@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Admin - Sala FF</title>
+    <style>
+        body { background-color: #000; color: #ffcc00; font-family: "Arial", sans-serif; }
+        h1 { text-align: center; margin-top: 30px; }
+        table { width: 80%; margin: auto; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ffcc00; padding: 10px; }
+        th { background-color: #111; }
+        td { background-color: #222; text-align: center; }
+        .add-sala { text-align: center; margin-top: 20px; }
+        input { padding: 5px; margin: 5px; }
+        button { padding: 5px 10px; background-color: #ff3300; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Painel do Admin</h1>
+
+    <div class="add-sala">
+        <form method="POST" action="{{ url_for('add_sala') }}">
+            <input type="text" name="id_sala" placeholder="ID da Sala" required>
+            <input type="text" name="senha" placeholder="Senha" required>
+            <button type="submit">Adicionar Sala</button>
+        </form>
+    </div>
+
+    <h2>Jogadores Pagos</h2>
+    <table>
+        <tr>
+            <th>Nick</th>
+            <th>Sala</th>
+        </tr>
+        {% for nick, sala in jogadores.items() %}
+        <tr>
+            <td>{{ nick }}</td>
+            <td>{{ sala }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

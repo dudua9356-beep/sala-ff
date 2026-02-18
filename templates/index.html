@@ -1,55 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recarga Sala FF 🔥</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #1e1e1e;
-            color: #fff;
-            text-align: center;
-            padding: 50px;
-        }
-        input, select, button {
-            padding: 10px;
-            margin: 10px;
-            font-size: 16px;
-        }
-        button {
-            background-color: #ff6600;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #ff3300;
-        }
-        .erro { color: #ff3333; margin-bottom: 15px; }
-    </style>
+<meta charset="UTF-8">
+<title>Recarga Sala FF 🔥</title>
 </head>
 <body>
-    <h1>Recarga Sala FF 🔥</h1>
+<h1>Recarga Sala FF 🔥</h1>
 
-    {% if erro %}
-        <div class="erro">{{ erro }}</div>
-    {% endif %}
+{% if erro %}
+<p style="color:red">{{ erro }}</p>
+{% endif %}
 
-    <form method="POST">
-        <label for="sala">Escolha a sala:</label>
-        <select name="sala" id="sala" required>
-            {% for nome, dados in salas.items() %}
-                <option value="{{ nome }}">{{ nome }} ({{ dados.ocupados }}/{{ dados.max }})</option>
-            {% endfor %}
-        </select>
-        <br>
+<form method="POST">
+<label>Escolha a sala:</label>
+<select name="sala">
+{% for nome, dados in salas.items() %}
+  <option value="{{ nome }}">{{ nome }} ({{ dados.jogadores|length }}/{{ dados.max_vagas }})</option>
+{% endfor %}
+</select><br><br>
 
-        <label for="nick">Digite seu nick do Free Fire:</label>
-        <input type="text" name="nick" id="nick" placeholder="Seu nick" required>
-        <br>
+<label>Digite seu nick do Free Fire:</label>
+<input type="text" name="nick" placeholder="Seu nick"><br><br>
+<button type="submit">Continuar</button>
+</form>
 
-        <button type="submit">Continuar</button>
-    </form>
+<a href="{{ url_for('adm_login') }}" style="position:absolute; top:10px; right:10px;">ADM</a>
+
 </body>
-    </html>
+</html>

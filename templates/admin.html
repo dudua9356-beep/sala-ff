@@ -4,21 +4,33 @@
 <meta charset="UTF-8">
 <title>Painel ADM</title>
 <style>
-body { font-family: sans-serif; padding:20px; }
-input { margin:5px; padding:5px; }
-button { padding:5px 10px; background:orange; color:white; border:none; cursor:pointer; border-radius:5px;}
+  body { background-color: #222; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+  .sala { background-color: rgba(0,0,0,0.7); padding: 20px; margin-bottom: 15px; border-radius: 10px; }
+  input { padding: 10px; margin: 5px 0; width: 100%; border-radius: 5px; border: none; }
+  button { padding: 10px 20px; margin-top: 5px; background-color: #ffcc00; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
 </style>
 </head>
 <body>
 <h1>Painel ADM</h1>
-{% if sucesso %}<p style="color:green">{{ sucesso }}</p>{% endif %}
-<form method="POST">
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for msg in messages %}
+      <p style="color:lime">{{ msg }}</p>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 {% for nome, dados in salas.items() %}
-<h2>{{ nome }}</h2>
-ID: <input type="text" name="id_{{ nome }}" value="{{ dados.id }}"><br>
-Senha: <input type="text" name="senha_{{ nome }}" value="{{ dados.senha }}"><br>
+<div class="sala">
+  <h2>{{ nome }}</h2>
+  <form method="POST">
+    <input type="hidden" name="sala" value="{{ nome }}">
+    <label>ID da sala:</label>
+    <input type="text" name="id_sala" value="{{ dados.id }}"><br>
+    <label>Senha da sala:</label>
+    <input type="text" name="senha_sala" value="{{ dados.senha }}"><br>
+    <button type="submit">Atualizar</button>
+  </form>
+</div>
 {% endfor %}
-<button type="submit">Salvar</button>
-</form>
 </body>
 </html>

@@ -1,118 +1,96 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-import mercadopago
+from flask import Flask, render_template, request, redirect, url_for
 import os
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey123"
 
-# Mercado Pago
-ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")
-sdk = mercadopago.SDK(ACCESS_TOKEN)
-
-# Salas com ID e senha (editáveis via ADM)
+# ID e senha das salas
 salas = {
-    "Sala 1": {"id": "123456", "senha": "abcdef", "jogadores": []},
-    "Sala 2": {"id": "654321", "senha": "fedcba", "jogadores": []},
+    "Sala 1": {"id": "123456", "senha": "abcdef"},
+    "Sala 2": {"id": "654321", "senha": "fedcba"},
 }
 
-# Senha ADM
-ADM_SENHA = "Duduzin321@"
+# Lista de jogadores que já pagaram
+jogadores_pagaram = []
 
+# SENHA ADM
+SENHA_ADM = "Duduzin321@"
 
-# Página principal
+# Rota principal do site
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
         nick = request.form.get("nick")
         sala = request.form.get("sala")
         if not nick or not sala:
-            flash("Digite seu nick e selecione a sala.", "erro")
-            return redirect(url_for("home"))
+            return render_template("index.html", erro="Digite seu nick e escolha a sala.", salas=salas)
         return redirect(url_for("pago", nick=nick, sala=sala))
     return render_template("index.html", salas=salas)
 
-
-# Página de pagamento
+# Página de pagamento (simulada, sem Mercado Pago real aqui)
 @app.route("/pago")
 def pago():
     nick = request.args.get("nick")
     sala = request.args.get("sala")
-    if not nick or not sala or sala not in salas:
-        flash("Dados inválidos.", "erro")
+    if not nick or not sala:
         return redirect(url_for("home"))
 
-    # Criar pagamento Mercado Pago
-    payment_data = {
-        "transaction_amount": 6.0,
-        "description": f"Recarga {sala} - Free Fire",
-        "payment_method_id": "pix",
-        "payer": {"email": f"{nick}@exemplo.com"},
-    }
+    # Adiciona jogador à lista (simulação de pagamento)
+    if not any(j['nick'] == nick and j['sala'] == sala for j in jogadores_pagaram):
+        jogadores_pagaram.append({"nick": nick, "sala": sala, "pago": False})
 
-    payment = sdk.payment().create(payment_data)
-    qr_code = payment["response"].get("point_of_interaction", {}).get(
-        "transaction_data", {}
-    ).get("qr_code_base64", "")
-    pix_code = payment["response"].get("point_of_interaction", {}).get(
-        "transaction_data", {}
-    ).get("qr_code", "")
+    # Aqui você poderia gerar QR code real ou código de pagamento
+    codigo_pagamento = f"PIX-{nick}-{sala}"
 
-    # Adiciona jogador à lista temporária
-    if nick not in salas[sala]["jogadores"]:
-        salas[sala]["jogadores"].append({"nick": nick, "pago": False})
+    return render_template("pago.html", nick=nick, sala=sala, codigo=codigo_pagamento)
 
-    return render_template("pago.html", nick=nick, sala=sala, qr_code=qr_code, pix_code=pix_code)
-
-
-# Página da sala (após pagamento confirmado)
+# Página da sala após pagamento
 @app.route("/sala")
-def sala_page():
+def sala():
     nick = request.args.get("nick")
     sala = request.args.get("sala")
-    if not nick or not sala or sala not in salas:
-        flash("Acesso inválido.", "erro")
+    jogador = next((j for j in jogadores_pagaram if j['nick'] == nick and j['sala'] == sala), None)
+    if not jogador or not jogador['pago']:
         return redirect(url_for("home"))
 
-    # Verifica se pagou
-    jogador = next((j for j in salas[sala]["jogadores"] if j["nick"] == nick), None)
-    if not jogador or not jogador["pago"]:
-        flash("Pagamento não confirmado.", "erro")
-        return redirect(url_for("home"))
+    id_sala = salas[sala]['id']
+    senha_sala = salas[sala]['senha']
 
-    return render_template(
-        "sala.html",
-        nick=nick,
-        id_sala=salas[sala]["id"],
-        senha=salas[sala]["senha"],
-        sala=sala,
-    )
-
+    return render_template("sala.html", nick=nick, id_sala=id_sala, senha_sala=senha_sala)
 
 # Login ADM
-@app.route("/admin_login", methods=["GET", "POST"])
-def admin_login():
+@app.route("/adm/login", methods=["GET", "POST"])
+def adm_login():
+    erro = None
     if request.method == "POST":
         senha = request.form.get("senha")
-        if senha == ADM_SENHA:
-            return redirect(url_for("admin_panel"))
+        if senha == SENHA_ADM:
+            return redirect(url_for("adm"))
         else:
-            flash("Senha incorreta.", "erro")
-    return render_template("admin_login.html")
-
+            erro = "Senha incorreta."
+    return render_template("admin_login.html", erro=erro)
 
 # Painel ADM
-@app.route("/admin", methods=["GET", "POST"])
-def admin_panel():
-    if request.method == "POST":
-        sala = request.form.get("sala")
-        id_sala = request.form.get("id_sala")
-        senha_sala = request.form.get("senha_sala")
-        if sala in salas:
-            salas[sala]["id"] = id_sala
-            salas[sala]["senha"] = senha_sala
-            flash("Sala atualizada com sucesso!", "success")
-    return render_template("admin.html", salas=salas)
+@app.route("/adm")
+def adm():
+    return render_template("admin.html", salas=salas, jogadores=jogadores_pagaram)
 
+# Atualizar salas
+@app.route("/adm/editar_sala", methods=["POST"])
+def editar_sala():
+    sala = request.form.get("sala")
+    id_novo = request.form.get("id")
+    senha_nova = request.form.get("senha")
+    if sala in salas:
+        salas[sala]['id'] = id_novo
+        salas[sala]['senha'] = senha_nova
+    return redirect(url_for("adm"))
+
+# Limpar lista de jogadores
+@app.route("/adm/limpar_jogadores", methods=["POST"])
+def limpar_jogadores():
+    global jogadores_pagaram
+    jogadores_pagaram = []
+    return redirect(url_for("adm"))
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))

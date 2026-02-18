@@ -5,60 +5,37 @@
 <title>Recarga Sala FF 🔥</title>
 <style>
 body {
-    background-image: url("https://share.google/K03P5KyhpFTigjOaq");
+    background: url('https://share.google/cG3BrTRr9BBOkoS0n') no-repeat center center fixed;
     background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    font-family: Arial, sans-serif;
-    color: white;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: sans-serif;
+    color: #fff;
 }
-
-.container {
-    background-color: rgba(0,0,0,0.6);
-    padding: 30px;
-    border-radius: 15px;
-    display: inline-block;
-    margin-top: 50px;
-}
-
-input, button {
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
-    border: none;
-    font-size: 16px;
-}
-
-button {
-    background-color: #ffcc00;
-    color: black;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-button:hover {
-    background-color: #ffaa00;
-}
-
-img.logo {
-    width: 300px;
-    margin-bottom: 20px;
-}
+.container { background: rgba(0,0,0,0.7); padding: 30px; border-radius: 15px; }
+input, select, button { margin: 10px 0; padding: 10px; border-radius: 5px; width: 100%; }
+button { cursor: pointer; background-color: orange; color: #fff; border: none; }
+.adm { position: absolute; top: 10px; right: 10px; }
 </style>
 </head>
 <body>
-<img src="https://share.google/cG3BrTRr9BBOkoS0n" class="logo" alt="Free Fire">
-
+<div class="adm"><a href="{{ url_for('admin_login') }}" style="color:white">ADM</a></div>
 <div class="container">
-    <h1>Recarga Sala FF 🔥</h1>
-    {% if erro %}<p style="color:red">{{ erro }}</p>{% endif %}
-    <form method="POST">
-        <p>Digite seu nick do Free Fire:</p>
-        <input type="text" name="nick" placeholder="Seu nick" required>
-        <br>
-        <button type="submit">Continuar</button>
-    </form>
+<h1>Recarga Sala FF 🔥</h1>
+{% if erro %}<p style="color:red">{{ erro }}</p>{% endif %}
+<form method="POST">
+<label>Escolha a sala:</label>
+<select name="sala" required>
+{% for nome, dados in salas.items() %}
+    <option value="{{ nome }}">{{ nome }} ({{ dados.ocupadas }}/{{ dados.max }})</option>
+{% endfor %}
+</select>
+<label>Digite seu nick do Free Fire:</label>
+<input type="text" name="nick" placeholder="Seu nick" required>
+<button type="submit">Continuar</button>
+</form>
 </div>
 </body>
 </html>

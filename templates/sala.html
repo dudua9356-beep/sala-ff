@@ -4,27 +4,14 @@
 <meta charset="UTF-8">
 <title>Sala {{ sala }}</title>
 <style>
-body {
-    background: url('https://share.google/K03P5KyhpFTigjOaq') no-repeat center center fixed;
-    background-size: cover;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    color: white;
-}
-.container {
-    margin-top: 50px;
-    padding: 20px;
-    background: rgba(0,0,0,0.6);
-    display: inline-block;
-    border-radius: 10px;
-}
+body {text-align:center; font-family: Arial, sans-serif; background:#111; color:#fff;}
+.container {margin-top:50px;}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>Sala {{ sala }}</h1>
-<p>Nick: {{ nick }}</p>
-<p>ID da sala: {{ id_sala }}</p>
+<h1>Bem-vindo, {{ nick }}!</h1>
+<p>ID da Sala: {{ id_sala }}</p>
 <p>Senha: {{ senha }}</p>
 </div>
 </body>

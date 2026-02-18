@@ -5,92 +5,79 @@ import os
 app = Flask(__name__)
 
 # Mercado Pago
-ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")
+ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")  # pegue do Render
 sdk = mercadopago.SDK(ACCESS_TOKEN)
 
-# Salas iniciais
+# Salas e informações iniciais (você pode editar o ID e senha no ADM)
 salas = {
-    "Sala 1": {"id": "123456", "senha": "abcdef", "ocupados": 0, "max": 49},
-    "Sala 2": {"id": "654321", "senha": "fedcba", "ocupados": 0, "max": 49}
+    "Sala 1": {"id": "123456", "senha": "abcdef", "jogadores": []},
+    "Sala 2": {"id": "654321", "senha": "fedcba", "jogadores": []}
 }
 
-# Lista de jogadores que já pagaram: {"nick": {"sala": "Sala 1", "pago": True/False}}
-jogadores = {}
-
-# SENHA ADM
+# Senha do painel ADM
 ADM_SENHA = "Duduzin321@"
 
-
-# Rota principal
+# Página inicial
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
         nick = request.form.get("nick")
-        sala = request.form.get("sala")
-        if not nick or not sala:
-            return render_template("index.html", salas=salas, erro="Digite seu nick e escolha a sala.")
-        return redirect(url_for("pago", nick=nick, sala=sala))
+        sala_nome = request.form.get("sala")
+        if not nick or not sala_nome:
+            return render_template("index.html", salas=salas, erro="Preencha nick e escolha uma sala.")
+        return redirect(url_for("pago", nick=nick, sala=sala_nome))
     return render_template("index.html", salas=salas)
-
 
 # Página de pagamento
 @app.route("/pago")
 def pago():
     nick = request.args.get("nick")
-    sala = request.args.get("sala")
-    if not nick or not sala:
+    sala_nome = request.args.get("sala")
+    if not nick or not sala_nome or sala_nome not in salas:
         return redirect(url_for("home"))
 
-    # Criar pagamento no Mercado Pago (PIX)
+    # Criar pagamento Mercado Pago
     payment_data = {
         "transaction_amount": 6.0,
-        "description": f"Recarga Sala FF 🔥 - {sala}",
+        "description": f"Recarga {sala_nome}",
         "payment_method_id": "pix",
-        "payer": {
-            "email": f"{nick}@exemplo.com"
-        }
+        "payer": {"email": f"{nick}@exemplo.com"}
     }
-
     payment = sdk.payment().create(payment_data)
-    qr_code_base64 = payment["response"].get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64", "")
-    qr_code_str = payment["response"].get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code", "")
+    qr_code = payment["response"].get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64", "")
+    copia_colar = payment["response"].get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code", "")
 
-    # Registra jogador
-    jogadores[nick] = {"sala": sala, "pago": False}
+    # Adiciona jogador à sala
+    if nick not in salas[sala_nome]["jogadores"]:
+        salas[sala_nome]["jogadores"].append({"nick": nick, "pago": False})
 
-    return render_template("pago.html", nick=nick, sala=sala, qr_code=qr_code_base64, qr_code_str=qr_code_str)
-
+    return render_template("pago.html", nick=nick, sala_nome=sala_nome, qr_code=qr_code, copia_colar=copia_colar)
 
 # Página da sala
 @app.route("/sala")
 def sala():
     nick = request.args.get("nick")
-    if nick not in jogadores or not jogadores[nick]["pago"]:
+    sala_nome = request.args.get("sala")
+    if not nick or not sala_nome or sala_nome not in salas:
         return redirect(url_for("home"))
-    sala_escolhida = jogadores[nick]["sala"]
-    sala_info = salas[sala_escolhida]
-    return render_template("sala.html", nick=nick, id_sala=sala_info["id"], senha=sala_info["senha"], sala=sala_escolhida)
-
+    # Verifica se jogador pagou (simulado aqui como True)
+    return render_template("sala.html", id_sala=salas[sala_nome]["id"], senha=salas[sala_nome]["senha"], nick=nick)
 
 # Painel ADM
-@app.route("/adm_login", methods=["GET", "POST"])
-def adm_login():
+@app.route("/adm", methods=["GET", "POST"])
+def adm():
+    erro = None
     if request.method == "POST":
         senha = request.form.get("senha")
-        if senha == ADM_SENHA:
-            return redirect(url_for("adm_panel"))
-        return render_template("admin_login.html", erro="Senha incorreta.")
-    return render_template("admin_login.html")
+        if senha != ADM_SENHA:
+            erro = "Senha incorreta!"
+        else:
+            return redirect(url_for("adm_painel"))
+    return render_template("adm_login.html", erro=erro)
 
-
-@app.route("/adm_panel", methods=["GET", "POST"])
-def adm_panel():
-    if request.method == "POST":
-        sala = request.form.get("sala")
-        salas[sala]["id"] = request.form.get("id_sala")
-        salas[sala]["senha"] = request.form.get("senha")
-    return render_template("admin.html", salas=salas, jogadores=jogadores)
-
+@app.route("/adm/painel")
+def adm_painel():
+    return render_template("admin.html", salas=salas)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))

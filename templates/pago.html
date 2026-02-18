@@ -2,46 +2,71 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Pagamento - {{ sala }}</title>
+<title>Pagamento Sala FF 🔥</title>
 <style>
-body {
-    background: url('https://share.google/K03P5KyhpFTigjOaq') no-repeat center center fixed;
-    background-size: cover;
+  body {
+    margin: 0;
+    padding: 0;
     font-family: Arial, sans-serif;
-    text-align: center;
+    background: #111;
     color: white;
-}
-.container {
-    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  .container {
+    text-align: center;
+    background-color: rgba(0,0,0,0.7);
     padding: 20px;
-    background: rgba(0,0,0,0.6);
-    display: inline-block;
     border-radius: 10px;
-}
-button { padding: 10px 20px; margin: 10px; cursor: pointer; }
-input { padding: 10px; width: 250px; }
+  }
+  img {
+    width: 250px;
+    height: 250px;
+    margin: 20px 0;
+  }
+  input {
+    width: 80%;
+    padding: 10px;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
 </style>
-<script>
-function copiar() {
-    var copyText = document.getElementById("pix_code");
-    copyText.select();
-    copyText.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    alert("Código Pix copiado!");
-}
-</script>
 </head>
 <body>
-<div class="container">
-<h2>Nick: {{ nick }}</h2>
-<p>Escaneie o QR Code abaixo para pagar R$6 e liberar a sala:</p>
-{% if qr_code %}
-<img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br>
-<input type="text" value="{{ pix_code }}" id="pix_code" readonly>
-<button onclick="copiar()">Copiar</button>
-{% else %}
-<p>QR Code não gerado. Tente novamente.</p>
-{% endif %}
-</div>
+  <div class="container">
+    <h2>Nick: {{ nick }}</h2>
+    <h3>Sala: {{ sala_nome }}</h3>
+
+    {% if qr_code %}
+      <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code PIX">
+    {% else %}
+      <p>QR Code não gerado. Tente novamente.</p>
+    {% endif %}
+
+    {% if copia_colar %}
+      <input type="text" id="pixcode" value="{{ copia_colar }}" readonly>
+      <button onclick="copyCode()">Copiar código PIX</button>
+    {% endif %}
+  </div>
+
+<script>
+function copyCode() {
+  const copyText = document.getElementById("pixcode");
+  copyText.select();
+  copyText.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(copyText.value);
+  alert("Código PIX copiado!");
+}
+</script>
+
 </body>
 </html>

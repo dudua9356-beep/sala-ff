@@ -2,49 +2,31 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Pagamento Sala FF</title>
+<title>Pagamento - {{ sala }}</title>
 <style>
-body {
-    background: url('https://lh3.googleusercontent.com/d/1vP4_uS_TqXf_I6Q0Q6F1nE2S8E4B9XyL') no-repeat center center fixed;
-    background-size: cover;
-    font-family: Arial, sans-serif;
-    color: #fff;
-    text-align: center;
-}
-.container { margin-top: 100px; }
-button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
-input { padding: 10px; font-size: 16px; width: 300px; }
+body {text-align:center; font-family: Arial, sans-serif; background:#000; color:#fff;}
+.container {margin-top:50px;}
+button {padding:10px 20px; margin-top:10px;}
+input {width: 300px; padding: 5px;}
 </style>
+<script>
+function copiar() {
+  var copyText = document.getElementById("codigo_pix");
+  copyText.select();
+  copyText.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  alert("Código copiado!");
+  window.location.href = "/confirmar_pagamento?nick={{ nick }}&sala={{ sala }}";
+}
+</script>
 </head>
 <body>
 <div class="container">
-<h2>Nick: {{ nick }}</h2>
-<h3>Sala: {{ sala_nome }}</h3>
-
-{% if qr_code_base64 %}
-<img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code"><br>
-<input type="text" value="{{ qr_code_text }}" id="pixCode" readonly>
-<button onclick="copyCode()">Copiar Código</button>
-<script>
-function copyCode() {
-    var copyText = document.getElementById("pixCode");
-    copyText.select();
-    copyText.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    alert("Código PIX copiado!");
-}
-
-// Checagem de pagamento automática a cada 5s
-setInterval(function() {
-    fetch(`/check_payment?nick={{ nick }}&sala={{ sala_nome }}`)
-    .then(response => response.json())
-    .then(data => {
-        if(data.status === "pago") {
-            window.location.href = `/sala?nick={{ nick }}&sala={{ sala_nome }}`;
-        }
-    });
-}, 5000);
-</script>
+<h1>Nick: {{ nick }}</h1>
+{% if qr_code %}
+<img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br>
+<input type="text" id="codigo_pix" value="{{ qr_code_text }}" readonly><br>
+<button onclick="copiar()">Copiar e Confirmar Pagamento</button>
 {% else %}
 <p>QR Code não gerado. Tente novamente.</p>
 {% endif %}

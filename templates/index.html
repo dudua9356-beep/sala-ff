@@ -4,6 +4,17 @@
     <title>Sala FF</title>
 </head>
 <body>
-    <h1>Meu site está online 🚀</h1>
+    <h1>Recarga Sala FF 🔥</h1>
+    <button onclick="pagar()">Pagar R$10</button>
+
+    <script>
+        function pagar() {
+            fetch("/criar-pagamento")
+                .then(res => res.json())
+                .then(data => {
+                    window.location.href = data.link_pagamento;
+                });
+        }
+    </script>
 </body>
 </html>

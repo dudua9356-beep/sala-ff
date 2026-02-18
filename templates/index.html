@@ -1,76 +1,41 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Recarga Sala FF 🔥</title>
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        background: url('https://lh3.googleusercontent.com/d/1vP4_uS_TqXf_I6Q0Q6F1nE2S8E4B9XyL') no-repeat center center fixed;
-        background-size: cover;
-        font-family: Arial, sans-serif;
-        color: white;
-    }
-    .container {
-        max-width: 400px;
-        margin: 80px auto;
-        background: rgba(0,0,0,0.7);
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-    }
-    input, select, button {
-        width: 90%;
-        padding: 10px;
-        margin: 10px 0;
-        border-radius: 5px;
-        border: none;
-        font-size: 16px;
-    }
-    button {
-        background-color: #ffcc00;
-        font-weight: bold;
-        cursor: pointer;
-    }
-    a#adm-btn {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        color: white;
-        font-weight: bold;
-        z-index: 1000;
-        text-decoration: none;
-        background: rgba(0,0,0,0.6);
-        padding: 5px 10px;
-        border-radius: 5px;
-    }
+body {
+    background-image: url('https://lh3.googleusercontent.com/d/1vP4_uS_TqXf_I6Q0Q6F1nE2S8E4B9XyL');
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: sans-serif;
+}
+.container { background: rgba(0,0,0,0.7); padding: 30px; border-radius: 10px; color: #fff; }
+select, input { padding: 10px; margin: 10px 0; width: 100%; }
+button { padding: 10px; width: 100%; background: orange; border: none; color: #fff; font-weight: bold; cursor: pointer; }
+button:hover { opacity: 0.8; }
+.adm-btn { position: absolute; top: 10px; right: 10px; }
 </style>
 </head>
 <body>
-    <!-- Botão ADM sempre visível -->
-    <a id="adm-btn" href="{{ url_for('adm_login') }}">ADM</a>
-
-    <div class="container">
-        <h1>Recarga Sala FF 🔥</h1>
-        <p>Digite seu nick e escolha a sala.</p>
-        {% if erro %}
-            <p style="color:red">{{ erro }}</p>
-        {% endif %}
-        <form method="POST">
-            <input type="text" name="nick" placeholder="Seu nick do Free Fire" required>
-
-            <select name="sala" required>
-                <option value="" disabled selected>Escolha a sala</option>
-                {% for nome, dados in salas.items() %}
-                    <option value="{{ nome }}">{{ nome }} ({{ dados['pagos']|length }}/{{ dados['max'] }})</option>
-                {% endfor %}
-            </select>
-
-            <button type="submit">Continuar</button>
-        </form>
-    </div>
+<a class="adm-btn" href="{{ url_for('adm_login') }}">ADM</a>
+<div class="container">
+<h1>Recarga Sala FF 🔥</h1>
+{% if erro %}<p style="color:red">{{ erro }}</p>{% endif %}
+<form method="POST">
+    <label>Escolha a sala:</label>
+    <select name="sala">
+        {% for nome, dados in salas.items() %}
+            <option value="{{ nome }}">{{ nome }} ({{ dados.pagos|length }}/49)</option>
+        {% endfor %}
+    </select>
+    <label>Digite seu nick do Free Fire:</label>
+    <input type="text" name="nick" placeholder="Seu nick" required>
+    <button type="submit">Continuar</button>
+</form>
+</div>
 </body>
 </html>

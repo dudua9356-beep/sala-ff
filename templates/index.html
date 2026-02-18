@@ -3,24 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Recarga Sala FF 🔥</title>
+    <style>
+        body { background-color: #1a1a1a; color: #ffcc00; font-family: "Arial", sans-serif; text-align: center; }
+        h1 { margin-top: 50px; font-size: 2.5em; }
+        input { padding: 10px; font-size: 1em; margin: 10px; border-radius: 5px; border: none; }
+        button { padding: 10px 20px; font-size: 1em; background-color: #ff3300; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+        .erro { color: #ff0000; }
+    </style>
 </head>
 <body>
-    <h1>Escolha sua Sala</h1>
-
+    <h1>Recarga Sala FF 🔥</h1>
     {% if erro %}
-        <p style="color:red;">{{ erro }}</p>
+        <p class="erro">{{ erro }}</p>
     {% endif %}
-
     <form method="POST">
-        <input type="text" name="nick" placeholder="Seu nick do Free Fire">
+        <input type="text" name="nick" placeholder="Digite seu nick do Free Fire" required>
+        <br>
         <button type="submit">Continuar</button>
     </form>
-
-    <h2>Salas disponíveis:</h2>
-    <ul>
-    {% for nome, dados in salas.items() %}
-        <li>{{ nome }} - ID: {{ dados.id }}, Senha: {{ dados.senha }}</li>
-    {% endfor %}
-    </ul>
 </body>
 </html>

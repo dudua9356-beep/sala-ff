@@ -1,20 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sala FF 🔥</title>
-<style>
-body { font-family: Arial; background:#0f0f0f; color:#fff; text-align:center; padding:50px; }
-h1 { color:#ffcc00; }
-.info { margin:20px; font-size:20px; }
-</style>
+    <meta charset="UTF-8">
+    <title>Sala FF</title>
 </head>
 <body>
-<h1>Bem-vindo(a), {{ nick }}!</h1>
-<div class="info">
-<p>ID da Sala: <strong>{{ id_sala }}</strong></p>
-<p>Senha da Sala: <strong>{{ senha }}</strong></p>
-</div>
+    <h1>Bem-vindo {{ nick }}</h1>
+    <p>ID da Sala: {{ id_sala }}</p>
+    <p>Senha: {{ senha }}</p>
 </body>
 </html>

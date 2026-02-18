@@ -4,7 +4,7 @@ from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
 
-# Pegando o Access Token da variável de ambiente
+# Pega o token do Render
 sdk = mercadopago.SDK(os.getenv("MP_ACCESS_TOKEN"))
 
 @app.route("/")
@@ -18,7 +18,7 @@ def criar_pagamento():
             {
                 "title": "Recarga Sala FF",
                 "quantity": 1,
-                "unit_price": 10.0
+                "unit_price": 6.0
             }
         ]
     }

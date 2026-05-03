@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import mercadopago
 import os
 
@@ -19,8 +19,7 @@ jogadores_pagaram = []
 
 SENHA_ADM = "Duduzin321@"
 
-# ------------------- ROTAS -------------------
-
+# ------------------- HOME -------------------
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
@@ -41,7 +40,7 @@ def home():
 
     return render_template("index.html", salas=salas)
 
-
+# ------------------- PAGAMENTO -------------------
 @app.route("/pago")
 def pago():
     nick = request.args.get("nick")
@@ -49,6 +48,15 @@ def pago():
 
     if not nick or sala_nome not in salas:
         return redirect(url_for("home"))
+
+    # Evita duplicar jogador
+    existente = next((j for j in jogadores_pagaram if j["nick"] == nick and j["sala"] == sala_nome), None)
+    if not existente:
+        jogadores_pagaram.append({
+            "nick": nick,
+            "sala": sala_nome,
+            "pago": False
+        })
 
     # Cria pagamento PIX
     payment_data = {
@@ -66,13 +74,6 @@ def pago():
     qr_base64 = payment["response"]["point_of_interaction"]["transaction_data"]["qr_code_base64"]
     qr_code = payment["response"]["point_of_interaction"]["transaction_data"]["qr_code"]
 
-    # Salva jogador como pendente
-    jogadores_pagaram.append({
-        "nick": nick,
-        "sala": sala_nome,
-        "pago": False
-    })
-
     return render_template(
         "pago.html",
         nick=nick,
@@ -81,7 +82,7 @@ def pago():
         sala=sala_nome
     )
 
-
+# ------------------- SALA -------------------
 @app.route("/sala")
 def sala():
     nick = request.args.get("nick")
@@ -102,39 +103,47 @@ def sala():
         sala=sala_nome
     )
 
+# ------------------- STATUS (AJAX) -------------------
+@app.route("/status")
+def status():
+    nick = request.args.get("nick")
+    sala = request.args.get("sala")
 
-# 🔥 WEBHOOK REAL
+    jogador = next((j for j in jogadores_pagaram if j["nick"] == nick and j["sala"] == sala), None)
+
+    return jsonify({"pago": jogador["pago"] if jogador else False})
+
+# ------------------- WEBHOOK REAL -------------------
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
 
-    if data.get("type") == "payment":
+    if data and data.get("type") == "payment":
         payment_id = data["data"]["id"]
 
         payment = sdk.payment().get(payment_id)
         status = payment["response"]["status"]
 
         if status == "approved":
-            ref = payment["response"]["external_reference"]
-            nick, sala_nome = ref.split("|")
+            ref = payment["response"].get("external_reference", "")
+            if "|" in ref:
+                nick, sala_nome = ref.split("|")
 
-            jogador = next(
-                (j for j in jogadores_pagaram if j["nick"] == nick and j["sala"] == sala_nome),
-                None
-            )
+                jogador = next(
+                    (j for j in jogadores_pagaram if j["nick"] == nick and j["sala"] == sala_nome),
+                    None
+                )
 
-            if jogador and not jogador["pago"]:
-                # BLOQUEIO DE LIMITE
-                if salas[sala_nome]["ocupados"] < salas[sala_nome]["max"]:
-                    jogador["pago"] = True
-                    salas[sala_nome]["ocupados"] += 1
-                else:
-                    print("Sala cheia - considerar reembolso")
+                if jogador and not jogador["pago"]:
+                    if salas[sala_nome]["ocupados"] < salas[sala_nome]["max"]:
+                        jogador["pago"] = True
+                        salas[sala_nome]["ocupados"] += 1
+                    else:
+                        print("Sala cheia - considerar reembolso")
 
     return "OK", 200
 
-
-# ADM
+# ------------------- ADM -------------------
 @app.route("/adm_login", methods=["GET", "POST"])
 def adm_login():
     erro = None
@@ -145,7 +154,6 @@ def adm_login():
         else:
             erro = "Senha incorreta."
     return render_template("admin_login.html", erro=erro)
-
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
@@ -159,7 +167,6 @@ def admin():
             salas[sala_nome]["senha"] = nova_senha
 
     return render_template("admin.html", salas=salas, jogadores=jogadores_pagaram)
-
 
 # ------------------- RUN -------------------
 if __name__ == "__main__":

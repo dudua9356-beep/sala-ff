@@ -3,33 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <title>Pagamento - {{ sala }}</title>
+
 <style>
-body {text-align:center; font-family: Arial, sans-serif; background:#000; color:#fff;}
-.container {margin-top:50px;}
-button {padding:10px 20px; margin-top:10px;}
-input {width: 300px; padding: 5px;}
+body {
+  text-align: center;
+  font-family: Arial, sans-serif;
+  background: #000;
+  color: #fff;
+}
+
+.container {
+  margin-top: 50px;
+}
+
+button {
+  padding: 10px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+input {
+  width: 300px;
+  padding: 5px;
+  text-align: center;
+}
 </style>
+
 <script>
 function copiar() {
   var copyText = document.getElementById("codigo_pix");
   copyText.select();
   copyText.setSelectionRange(0, 99999);
   document.execCommand("copy");
-  alert("Código copiado!");
-  window.location.href = "/confirmar_pagamento?nick={{ nick }}&sala={{ sala }}";
+  alert("Código copiado! Agora é só pagar no seu banco.");
 }
+
+// 🔥 Verifica automaticamente se pagou
+setInterval(() => {
+    fetch(`/status?nick={{nick}}&sala={{sala}}`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.pago) {
+            window.location.href = `/sala?nick={{nick}}&sala={{sala}}`
+        }
+    })
+}, 3000);
 </script>
+
 </head>
+
 <body>
 <div class="container">
+
 <h1>Nick: {{ nick }}</h1>
+
 {% if qr_code %}
-<img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br>
-<input type="text" id="codigo_pix" value="{{ qr_code_text }}" readonly><br>
-<button onclick="copiar()">Copiar e Confirmar Pagamento</button>
+  <p>Escaneie o QR Code ou copie o código abaixo para pagar:</p>
+
+  <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"><br><br>
+
+  <input type="text" id="codigo_pix" value="{{ qr_code_text }}" readonly><br>
+
+  <button onclick="copiar()">Copiar código Pix</button>
+
+  <p>Aguardando pagamento automático...</p>
+
 {% else %}
-<p>QR Code não gerado. Tente novamente.</p>
+  <p>Erro ao gerar QR Code. Tente novamente.</p>
 {% endif %}
+
 </div>
 </body>
 </html>

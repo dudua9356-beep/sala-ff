@@ -4,66 +4,70 @@ import os
 
 app = Flask(__name__)
 
-# Mercado Pago
 ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")
 sdk = mercadopago.SDK(ACCESS_TOKEN)
 
-# Salas
-salas = {
-    "Sala 1": {"id": "123456", "senha": "abcdef", "ocupados": 0, "max": 49},
-    "Sala 2": {"id": "654321", "senha": "fedcba", "ocupados": 0, "max": 49}
+# 🔥 MULTI CLIENTE
+usuarios = {
+    "eduardo": {
+        "salas": {
+            "Sala 1": {"id": "123456", "senha": "abcdef", "ocupados": 0, "max": 49},
+            "Sala 2": {"id": "654321", "senha": "fedcba", "ocupados": 0, "max": 49}
+        },
+        "jogadores": []
+    }
 }
 
-# Jogadores
-jogadores_pagaram = []
+# ---------------- HOME ----------------
+@app.route("/<cliente>", methods=["GET", "POST"])
+def home(cliente):
+    user = usuarios.get(cliente)
 
-SENHA_ADM = "Duduzin321@"
+    if not user:
+        return "Cliente não encontrado"
 
-# ------------------- HOME -------------------
-@app.route("/", methods=["GET", "POST"])
-def home():
     if request.method == "POST":
         nick = request.form.get("nick")
         sala_escolhida = request.form.get("sala")
 
         if not nick:
-            return render_template("index.html", erro="Digite seu nick.", salas=salas)
+            return render_template("index.html", erro="Digite seu nick.", salas=user["salas"], cliente=cliente)
 
-        if sala_escolhida not in salas:
-            return render_template("index.html", erro="Sala inválida.", salas=salas)
+        if sala_escolhida not in user["salas"]:
+            return render_template("index.html", erro="Sala inválida.", salas=user["salas"], cliente=cliente)
 
-        # BLOQUEIA SE LOTOU
-        if salas[sala_escolhida]["ocupados"] >= salas[sala_escolhida]["max"]:
-            return render_template("index.html", erro="Sala já está cheia.", salas=salas)
+        if user["salas"][sala_escolhida]["ocupados"] >= user["salas"][sala_escolhida]["max"]:
+            return render_template("index.html", erro="Sala cheia.", salas=user["salas"], cliente=cliente)
 
-        return redirect(url_for("pago", nick=nick, sala=sala_escolhida))
+        return redirect(url_for("pago", cliente=cliente, nick=nick, sala=sala_escolhida))
 
-    return render_template("index.html", salas=salas)
+    return render_template("index.html", salas=user["salas"], cliente=cliente)
 
-# ------------------- PAGAMENTO -------------------
-@app.route("/pago")
-def pago():
+# ---------------- PAGAMENTO ----------------
+@app.route("/<cliente>/pago")
+def pago(cliente):
+    user = usuarios.get(cliente)
+
     nick = request.args.get("nick")
     sala_nome = request.args.get("sala")
 
-    if not nick or sala_nome not in salas:
-        return redirect(url_for("home"))
+    if not user or not nick or sala_nome not in user["salas"]:
+        return redirect(f"/{cliente}")
 
-    # Evita duplicar jogador
-    existente = next((j for j in jogadores_pagaram if j["nick"] == nick and j["sala"] == sala_nome), None)
+    existente = next((j for j in user["jogadores"] if j["nick"] == nick and j["sala"] == sala_nome), None)
     if not existente:
-        jogadores_pagaram.append({
+        user["jogadores"].append({
             "nick": nick,
             "sala": sala_nome,
             "pago": False
         })
 
-    # Cria pagamento PIX
     payment_data = {
         "transaction_amount": 6.0,
-        "description": f"Recarga {sala_nome}",
+        "description": f"{cliente}-{sala_nome}",
         "payment_method_id": "pix",
-        "external_reference": f"{nick}|{sala_nome}",
+        "external_reference": f"{cliente}|{nick}|{sala_nome}",
+        "notification_url": "https://sala-ff-2.onrender.com/webhook",
         "payer": {
             "email": f"{nick}@exemplo.com"
         }
@@ -79,21 +83,24 @@ def pago():
         nick=nick,
         qr_code=qr_base64,
         qr_code_text=qr_code,
-        sala=sala_nome
+        sala=sala_nome,
+        cliente=cliente
     )
 
-# ------------------- SALA -------------------
-@app.route("/sala")
-def sala():
+# ---------------- SALA ----------------
+@app.route("/<cliente>/sala")
+def sala(cliente):
+    user = usuarios.get(cliente)
+
     nick = request.args.get("nick")
     sala_nome = request.args.get("sala")
 
-    jogador = next((j for j in jogadores_pagaram if j["nick"] == nick and j["sala"] == sala_nome), None)
+    jogador = next((j for j in user["jogadores"] if j["nick"] == nick and j["sala"] == sala_nome), None)
 
     if not jogador or not jogador["pago"]:
-        return redirect(url_for("home"))
+        return redirect(f"/{cliente}")
 
-    sala_info = salas[sala_nome]
+    sala_info = user["salas"][sala_nome]
 
     return render_template(
         "sala.html",
@@ -103,17 +110,19 @@ def sala():
         sala=sala_nome
     )
 
-# ------------------- STATUS (AJAX) -------------------
-@app.route("/status")
-def status():
+# ---------------- STATUS ----------------
+@app.route("/<cliente>/status")
+def status(cliente):
+    user = usuarios.get(cliente)
+
     nick = request.args.get("nick")
     sala = request.args.get("sala")
 
-    jogador = next((j for j in jogadores_pagaram if j["nick"] == nick and j["sala"] == sala), None)
+    jogador = next((j for j in user["jogadores"] if j["nick"] == nick and j["sala"] == sala), None)
 
     return jsonify({"pago": jogador["pago"] if jogador else False})
 
-# ------------------- WEBHOOK REAL -------------------
+# ---------------- WEBHOOK ----------------
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
@@ -126,49 +135,25 @@ def webhook():
 
         if status == "approved":
             ref = payment["response"].get("external_reference", "")
+
             if "|" in ref:
-                nick, sala_nome = ref.split("|")
+                cliente, nick, sala_nome = ref.split("|")
+
+                user = usuarios.get(cliente)
 
                 jogador = next(
-                    (j for j in jogadores_pagaram if j["nick"] == nick and j["sala"] == sala_nome),
+                    (j for j in user["jogadores"] if j["nick"] == nick and j["sala"] == sala_nome),
                     None
                 )
 
                 if jogador and not jogador["pago"]:
-                    if salas[sala_nome]["ocupados"] < salas[sala_nome]["max"]:
+                    if user["salas"][sala_nome]["ocupados"] < user["salas"][sala_nome]["max"]:
                         jogador["pago"] = True
-                        salas[sala_nome]["ocupados"] += 1
-                    else:
-                        print("Sala cheia - considerar reembolso")
+                        user["salas"][sala_nome]["ocupados"] += 1
 
     return "OK", 200
 
-# ------------------- ADM -------------------
-@app.route("/adm_login", methods=["GET", "POST"])
-def adm_login():
-    erro = None
-    if request.method == "POST":
-        senha = request.form.get("senha")
-        if senha == SENHA_ADM:
-            return redirect(url_for("admin"))
-        else:
-            erro = "Senha incorreta."
-    return render_template("admin_login.html", erro=erro)
-
-@app.route("/admin", methods=["GET", "POST"])
-def admin():
-    if request.method == "POST":
-        sala_nome = request.form.get("sala")
-        novo_id = request.form.get("id_sala")
-        nova_senha = request.form.get("senha_sala")
-
-        if sala_nome in salas:
-            salas[sala_nome]["id"] = novo_id
-            salas[sala_nome]["senha"] = nova_senha
-
-    return render_template("admin.html", salas=salas, jogadores=jogadores_pagaram)
-
-# ------------------- RUN -------------------
+# ---------------- RUN ----------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)

@@ -8,7 +8,6 @@ app.secret_key = "segredo123"
 ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")
 sdk = mercadopago.SDK(ACCESS_TOKEN)
 
-# 🔥 BANCO TEMPORÁRIO
 usuarios = {}
 
 # ---------------- RAIZ ----------------
@@ -23,6 +22,9 @@ def novo():
         nome = request.form.get("nome")
         senha = request.form.get("senha")
 
+        if not nome or not senha:
+            return "Preenche tudo"
+
         if nome in usuarios:
             return "Cliente já existe"
 
@@ -34,7 +36,7 @@ def novo():
             "jogadores": []
         }
 
-        return f"✅ Criado! Link: /{nome} | Login: /login"
+        return f"Cliente criado! 👉 <a href='/{nome}'>Entrar no sistema</a>"
 
     return render_template("criar_cliente.html")
 
@@ -48,6 +50,10 @@ def home(cliente):
     if request.method == "POST":
         nick = request.form.get("nick")
         sala = request.form.get("sala")
+
+        if not nick or sala not in user["salas"]:
+            return redirect(f"/{cliente}")
+
         return redirect(url_for("pago", cliente=cliente, nick=nick, sala=sala))
 
     return render_template("index.html", salas=user["salas"], cliente=cliente)
@@ -123,6 +129,28 @@ def status(cliente):
     jogador = next((j for j in user["jogadores"] if j["nick"] == nick and j["sala"] == sala), None)
 
     return jsonify({"pago": jogador["pago"] if jogador else False})
+
+# ---------------- SALA ----------------
+@app.route("/<cliente>/sala")
+def sala(cliente):
+    user = usuarios.get(cliente)
+
+    nick = request.args.get("nick")
+    sala_nome = request.args.get("sala")
+
+    jogador = next((j for j in user["jogadores"] if j["nick"] == nick and j["sala"] == sala_nome), None)
+
+    if not jogador or not jogador["pago"]:
+        return redirect(f"/{cliente}")
+
+    sala_info = user["salas"][sala_nome]
+
+    return render_template("sala.html",
+        id_sala=sala_info["id"],
+        senha=sala_info["senha"],
+        nick=nick,
+        sala=sala_nome
+    )
 
 # ---------------- WEBHOOK ----------------
 @app.route("/webhook", methods=["POST"])

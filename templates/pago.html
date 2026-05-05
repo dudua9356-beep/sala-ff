@@ -1,60 +1,22 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>Pagamento</title>
-
-<style>
-body {
-  background: black;
-  color: white;
-  text-align: center;
-  font-family: Arial;
-}
-
-button {
-  padding: 10px;
-  margin-top: 10px;
-  background: yellow;
-  border: none;
-  cursor: pointer;
-}
-</style>
-
 <script>
 function copiarPix() {
   const input = document.getElementById("pix");
   input.select();
-  input.setSelectionRange(0, 99999);
   document.execCommand("copy");
   alert("Pix copiado!");
 }
 
-// 🔥 verifica pagamento automático
 setInterval(() => {
 fetch(`/${{cliente}}/status?nick={{nick}}&sala={{sala}}`)
-.then(res => res.json())
-.then(data => {
-if (data.pago) {
+.then(r => r.json())
+.then(d => {
+if (d.pago) {
 window.location.href = `/${{cliente}}/sala?nick={{nick}}&sala={{sala}}`
 }
 })
 }, 3000);
 </script>
 
-</head>
-
-<body>
-
-<h2>Escaneie ou copie o Pix</h2>
-
-<img src="data:image/png;base64,{{ qr_code }}"><br><br>
-
-<input id="pix" value="{{ qr_code_text }}" readonly style="width:300px"><br>
-
-<button onclick="copiarPix()">Copiar código Pix</button>
-
-<p>Aguardando pagamento automático...</p>
-
-</body>
-</html>
+<img src="data:image/png;base64,{{ qr_code }}">
+<input id="pix" value="{{ qr_code_text }}">
+<button onclick="copiarPix()">Copiar Pix</button>

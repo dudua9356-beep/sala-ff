@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 import mercadopago
 import os
 
@@ -19,7 +19,12 @@ usuarios = {
     }
 }
 
-# ---------------- HOME CLIENTE ----------------
+# ✅ ROTA RAIZ (corrige teu erro)
+@app.route("/")
+def raiz():
+    return redirect("/eduardo")
+
+# ---------------- HOME ----------------
 @app.route("/<cliente>", methods=["GET", "POST"])
 def home(cliente):
     user = usuarios.get(cliente)
@@ -29,7 +34,6 @@ def home(cliente):
     if request.method == "POST":
         nick = request.form.get("nick")
         sala = request.form.get("sala")
-
         return redirect(url_for("pago", cliente=cliente, nick=nick, sala=sala))
 
     return render_template("index.html", salas=user["salas"], cliente=cliente)
@@ -93,6 +97,18 @@ def pago(cliente):
     user["jogadores"].append({"nick": nick, "sala": sala, "pago": False})
 
     return render_template("pago.html", qr_code=qr, qr_code_text=code, nick=nick, sala=sala, cliente=cliente)
+
+# ---------------- STATUS ----------------
+@app.route("/<cliente>/status")
+def status(cliente):
+    user = usuarios.get(cliente)
+
+    nick = request.args.get("nick")
+    sala = request.args.get("sala")
+
+    jogador = next((j for j in user["jogadores"] if j["nick"] == nick and j["sala"] == sala), None)
+
+    return jsonify({"pago": jogador["pago"] if jogador else False})
 
 # ---------------- WEBHOOK ----------------
 @app.route("/webhook", methods=["POST"])

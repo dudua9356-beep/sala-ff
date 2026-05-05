@@ -1,0 +1,19 @@
+<h1>Painel</h1>
+
+<h2>Criar Sala</h2>
+<form method="POST">
+<input name="nome" placeholder="Nome da sala">
+<input name="id" placeholder="ID da sala">
+<input name="senha" placeholder="Senha">
+<button>Criar</button>
+</form>
+
+<h2>Salas</h2>
+{% for nome, sala in salas.items() %}
+<p>{{ nome }} - {{ sala['ocupados'] }}/{{ sala['max'] }}</p>
+{% endfor %}
+
+<h2>Jogadores</h2>
+{% for j in jogadores %}
+<p>{{ j.nick }} - {{ j.sala }} - {{ j.pago }}</p>
+{% endfor %}

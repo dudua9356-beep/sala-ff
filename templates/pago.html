@@ -6,17 +6,24 @@ function copiar() {
   alert("Copiado!");
 }
 
-setInterval(()=>{
-fetch(`/${{cliente}}/status?nick={{nick}}&sala={{sala}}`)
-.then(r=>r.json())
-.then(d=>{
-if(d.pago){
-window.location.href=`/${{cliente}}/sala?nick={{nick}}&sala={{sala}}`
-}
-})
-},3000)
+// 🔥 verificação automática
+setInterval(() => {
+    fetch("/{{ cliente }}/status?nick={{ nick }}&sala={{ sala }}")
+    .then(r => r.json())
+    .then(d => {
+        if (d.pago) {
+            window.location.href = "/{{ cliente }}/sala?nick={{ nick }}&sala={{ sala }}"
+        }
+    })
+}, 3000);
 </script>
 
-<img src="data:image/png;base64,{{ qr_code }}">
-<input id="pix" value="{{ qr_code_text }}">
+<h2>Pagamento via Pix</h2>
+
+<img src="data:image/png;base64,{{ qr_code }}"><br><br>
+
+<input id="pix" value="{{ qr_code_text }}" readonly style="width:300px"><br><br>
+
 <button onclick="copiar()">Copiar Pix</button>
+
+<p>Aguardando pagamento automático...</p>

@@ -5,9 +5,6 @@ import os
 app = Flask(__name__)
 app.secret_key = "segredo123"
 
-ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")
-sdk = mercadopago.SDK(ACCESS_TOKEN)
-
 usuarios = {}
 
 # ---------------- RAIZ ----------------
@@ -21,22 +18,24 @@ def novo():
     if request.method == "POST":
         nome = request.form.get("nome")
         senha = request.form.get("senha")
+        token = request.form.get("token")
 
-        if not nome or not senha:
-            return "Preenche tudo"
+        if not nome or not senha or not token:
+            return "Preencha tudo"
 
         if nome in usuarios:
             return "Cliente já existe"
 
         usuarios[nome] = {
             "senha": senha,
+            "access_token": token,
             "salas": {
                 "Sala 1": {"id": "0000", "senha": "0000", "ocupados": 0, "max": 48}
             },
             "jogadores": []
         }
 
-        return f"Cliente criado! 👉 <a href='/{nome}'>Entrar no sistema</a>"
+        return f"Cliente criado! 👉 <a href='/{nome}'>Entrar</a>"
 
     return render_template("criar_cliente.html")
 
@@ -44,6 +43,7 @@ def novo():
 @app.route("/<cliente>", methods=["GET", "POST"])
 def home(cliente):
     user = usuarios.get(cliente)
+
     if not user:
         return "Cliente não encontrado"
 
@@ -53,6 +53,9 @@ def home(cliente):
 
         if not nick or sala not in user["salas"]:
             return redirect(f"/{cliente}")
+
+        if user["salas"][sala]["ocupados"] >= user["salas"][sala]["max"]:
+            return render_template("index.html", salas=user["salas"], cliente=cliente, erro="Sala cheia")
 
         return redirect(url_for("pago", cliente=cliente, nick=nick, sala=sala))
 
@@ -84,12 +87,13 @@ def painel():
         id_sala = request.form.get("id")
         senha = request.form.get("senha")
 
-        user["salas"][nome] = {
-            "id": id_sala,
-            "senha": senha,
-            "ocupados": 0,
-            "max": 48
-        }
+        if nome:
+            user["salas"][nome] = {
+                "id": id_sala,
+                "senha": senha,
+                "ocupados": 0,
+                "max": 48
+            }
 
     return render_template("painel.html", salas=user["salas"], jogadores=user["jogadores"])
 
@@ -100,6 +104,8 @@ def pago(cliente):
 
     nick = request.args.get("nick")
     sala = request.args.get("sala")
+
+    sdk = mercadopago.SDK(user["access_token"])
 
     payment_data = {
         "transaction_amount": 6.0,
@@ -159,17 +165,22 @@ def webhook():
 
     if data and data.get("type") == "payment":
         payment_id = data["data"]["id"]
-        payment = sdk.payment().get(payment_id)
 
-        if payment["response"]["status"] == "approved":
-            ref = payment["response"]["external_reference"]
-            cliente, nick, sala = ref.split("|")
+        for cliente, user in usuarios.items():
+            sdk = mercadopago.SDK(user["access_token"])
+            payment = sdk.payment().get(payment_id)
 
-            user = usuarios.get(cliente)
+            if payment["response"]["status"] == "approved":
+                ref = payment["response"].get("external_reference", "")
 
-            for j in user["jogadores"]:
-                if j["nick"] == nick and j["sala"] == sala:
-                    j["pago"] = True
-                    user["salas"][sala]["ocupados"] += 1
+                if "|" in ref:
+                    c, nick, sala = ref.split("|")
+
+                    if c == cliente:
+                        for j in user["jogadores"]:
+                            if j["nick"] == nick and j["sala"] == sala:
+                                if not j["pago"]:
+                                    j["pago"] = True
+                                    user["salas"][sala]["ocupados"] += 1
 
     return "ok"

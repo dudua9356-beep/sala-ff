@@ -1,22 +1,22 @@
 <script>
-function copiarPix() {
-  const input = document.getElementById("pix");
-  input.select();
+function copiar() {
+  let i = document.getElementById("pix");
+  i.select();
   document.execCommand("copy");
-  alert("Pix copiado!");
+  alert("Copiado!");
 }
 
-setInterval(() => {
+setInterval(()=>{
 fetch(`/${{cliente}}/status?nick={{nick}}&sala={{sala}}`)
-.then(r => r.json())
-.then(d => {
-if (d.pago) {
-window.location.href = `/${{cliente}}/sala?nick={{nick}}&sala={{sala}}`
+.then(r=>r.json())
+.then(d=>{
+if(d.pago){
+window.location.href=`/${{cliente}}/sala?nick={{nick}}&sala={{sala}}`
 }
 })
-}, 3000);
+},3000)
 </script>
 
 <img src="data:image/png;base64,{{ qr_code }}">
 <input id="pix" value="{{ qr_code_text }}">
-<button onclick="copiarPix()">Copiar Pix</button>
+<button onclick="copiar()">Copiar Pix</button>

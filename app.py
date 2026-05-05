@@ -68,7 +68,7 @@ def painel():
             "id": id_sala,
             "senha": senha,
             "ocupados": 0,
-            "max": 49
+            "max": 48
         }
 
     return render_template("painel.html", salas=user["salas"], jogadores=user["jogadores"])

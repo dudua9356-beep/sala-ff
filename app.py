@@ -8,23 +8,37 @@ app.secret_key = "segredo123"
 ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN")
 sdk = mercadopago.SDK(ACCESS_TOKEN)
 
-# 🔥 CLIENTES
-usuarios = {
-    "eduardo": {
-        "senha": "123",
-        "salas": {
-            "Sala 1": {"id": "123456", "senha": "abcdef", "ocupados": 0, "max": 49}
-        },
-        "jogadores": []
-    }
-}
+# 🔥 BANCO TEMPORÁRIO
+usuarios = {}
 
-# ✅ ROTA RAIZ (corrige teu erro)
+# ---------------- RAIZ ----------------
 @app.route("/")
 def raiz():
-    return redirect("/eduardo")
+    return redirect("/novo")
 
-# ---------------- HOME ----------------
+# ---------------- CRIAR CLIENTE ----------------
+@app.route("/novo", methods=["GET", "POST"])
+def novo():
+    if request.method == "POST":
+        nome = request.form.get("nome")
+        senha = request.form.get("senha")
+
+        if nome in usuarios:
+            return "Cliente já existe"
+
+        usuarios[nome] = {
+            "senha": senha,
+            "salas": {
+                "Sala 1": {"id": "0000", "senha": "0000", "ocupados": 0, "max": 48}
+            },
+            "jogadores": []
+        }
+
+        return f"✅ Criado! Link: /{nome} | Login: /login"
+
+    return render_template("criar_cliente.html")
+
+# ---------------- HOME CLIENTE ----------------
 @app.route("/<cliente>", methods=["GET", "POST"])
 def home(cliente):
     user = usuarios.get(cliente)
@@ -115,7 +129,7 @@ def status(cliente):
 def webhook():
     data = request.json
 
-    if data.get("type") == "payment":
+    if data and data.get("type") == "payment":
         payment_id = data["data"]["id"]
         payment = sdk.payment().get(payment_id)
 
@@ -123,7 +137,7 @@ def webhook():
             ref = payment["response"]["external_reference"]
             cliente, nick, sala = ref.split("|")
 
-            user = usuarios[cliente]
+            user = usuarios.get(cliente)
 
             for j in user["jogadores"]:
                 if j["nick"] == nick and j["sala"] == sala:
@@ -131,7 +145,3 @@ def webhook():
                     user["salas"][sala]["ocupados"] += 1
 
     return "ok"
-
-# ---------------- RUN ----------------
-if __name__ == "__main__":
-    app.run()
